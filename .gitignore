@@ -1,0 +1,5 @@
+.env
+config.py
+knowledge_book.pdf
+.ipynb_checkpoints
+__pycache__
