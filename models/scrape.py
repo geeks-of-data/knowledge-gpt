@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 
-class SearchQuery(BaseModel):
-    query: str
+class ScrapeQuery(BaseModel):
+    url: str
     embedding_extractor: str
     model_lang: str
+    query: str
