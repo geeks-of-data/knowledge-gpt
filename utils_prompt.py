@@ -10,11 +10,11 @@ ENCODING = "gpt2"
 encoding = tiktoken.get_encoding(ENCODING)
 separator_len = len(encoding.encode(SEPARATOR))
 
-def construct_prompt(question: str, context_embeddings: dict, df: pd.DataFrame) -> str:
+def construct_prompt(question: str, context_embeddings: dict, df: pd.DataFrame, embedding_type: str = "hf", model_lang:str="en") -> str:
     """
     Fetch relevant 
     """
-    most_relevant_document_sections = order_document_sections_by_query_similarity(question, context_embeddings)
+    most_relevant_document_sections = order_document_sections_by_query_similarity(question, context_embeddings, embedding_type=embedding_type, model_lang=model_lang)
     
     chosen_sections = []
     chosen_sections_len = 0
@@ -32,7 +32,10 @@ def construct_prompt(question: str, context_embeddings: dict, df: pd.DataFrame) 
             
     print(f"Selected {len(chosen_sections)} document sections:")
     print("\n".join(chosen_sections_indexes))
-    
-    header = """Answer the question as truthfully as possible using the provided context, and if the answer is not contained within the text below, say "I don't know."\n\nContext:\n"""
+    header = ""
+    if model_lang == "tr":
+        header = """Cümleyi doğru bir şekilde cevaplayın ve cevap metin içinde yoksa "bilmiyorum" diyin.\n\nMetin:\n"""
+    else:
+        header = """Answer the question as truthfully as possible using the provided context, and if the answer is not contained within the text below, say "I don't know."\n\nContext:\n"""
     
     return header + "".join(chosen_sections) + "\n\n Q: " + question + "\n A:"

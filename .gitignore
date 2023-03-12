@@ -1,5 +1,6 @@
 .env
 config.py
 knowledge_book.pdf
+cookbook_tr.pdf
 .ipynb_checkpoints
 __pycache__

@@ -16,12 +16,16 @@ def answer_query_with_context(
     query: str,
     df: pd.DataFrame,
     document_embeddings: dict[(str, str), np.array],
-    show_prompt: bool = True
+    show_prompt: bool = True,
+    embedding_type: str = "hf",
+    model_lang: str = "en"
 ) -> str:
     prompt = construct_prompt(
         query,
         document_embeddings,
-        df
+        df,
+        embedding_type=embedding_type,
+        model_lang=model_lang
     )
     
     if show_prompt:
