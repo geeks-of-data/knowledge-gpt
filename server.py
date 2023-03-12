@@ -1,13 +1,16 @@
-from fastapi import FastAPI, File, UploadFile, Form
+from fastapi import FastAPI, File, UploadFile, Form, HTTPException
 from io import BytesIO
 from utils_pdf import process_pdf, process_pdf_page
 from utils_embedding import compute_doc_embeddings_hf,  compute_doc_embeddings
 from utils_completion import answer_query_with_context
 from utils_scrape import scrape_content
+from utils_subtitles import scrape_youtube
 from typing import Optional
 from models.search import SearchQuery
 from models.scrape import ScrapeQuery
+from models.yt_subs import YTSubsQuery
 from fastapi import HTTPException
+
 
 app = FastAPI()
 
@@ -125,3 +128,34 @@ async def scrape_website(url: ScrapeQuery):
     return {"answer": answer}
     
 
+
+@app.post("/youtube_subtitles/")
+async def youtube_subtitles(query: YTSubsQuery):
+    """
+    Endpoint that takes a YouTube video ID as input and returns the captions
+    as a pandas DataFrame with the key "caption".
+    """
+    if not query.video_id:
+        raise HTTPException(status_code=400, detail="Video ID is missing")
+    
+    global df
+
+    df = scrape_youtube(query.video_id)
+
+    global embeddings
+
+    if embeddings is None:
+        if query.embedding_extractor == "hf":
+            embeddings = compute_doc_embeddings_hf(df, query.model_lang)
+        else:
+            embeddings = compute_doc_embeddings(df)
+    
+    target = query.query
+    answer = ""
+
+    if query.embedding_extractor == "hf":
+        answer  = answer_query_with_context(target, df, embeddings, embedding_type="hf", model_lang=query.model_lang)
+    else:
+        answer  = answer_query_with_context(target, df, embeddings, embedding_type="openai", model_lang=query.model_lang)
+
+    return {"answer": answer}
