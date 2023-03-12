@@ -4,3 +4,10 @@ knowledge_book.pdf
 cookbook_tr.pdf
 .ipynb_checkpoints
 __pycache__
+*.webm
+*.mp4
+*.mp3
+*.ogg
+*.wav
+*.flac
+*.vtt

@@ -3,7 +3,7 @@ import pandas as pd
 
 import tiktoken
 
-MAX_SECTION_LEN = 500
+MAX_SECTION_LEN = 1000
 SEPARATOR = "\n* "
 ENCODING = "gpt2" 
 
