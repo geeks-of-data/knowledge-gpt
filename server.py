@@ -3,9 +3,11 @@ from io import BytesIO
 from utils_pdf import process_pdf, process_pdf_page
 from utils_embedding import compute_doc_embeddings_hf,  compute_doc_embeddings
 from utils_completion import answer_query_with_context
+from utils_scrape import scrape_content
 from typing import Optional
 from models.search import SearchQuery
-
+from models.scrape import ScrapeQuery
+from fastapi import HTTPException
 
 app = FastAPI()
 
@@ -89,3 +91,37 @@ async def all_in_one(query: str = Form(""), extraction_type: str = Form("page"),
     else:
         answer  = answer_query_with_context(target, df, embeddings, embedding_type="openai", model_lang=model_lang)
     return {"answer": answer}
+
+@app.post("/scrape/")
+async def scrape_website(url: ScrapeQuery):
+    """
+    Endpoint that takes a URL as input and returns the scraped content.
+    """
+    if not url:
+        raise HTTPException(status_code=400, detail="URL is missing")
+    
+    embedding_extractor = url.embedding_extractor
+    model_lang = url.model_lang
+    
+    global df
+
+    df = scrape_content(url.url)
+
+    global embeddings
+    if embeddings is None:
+        if embedding_extractor == "hf":
+            embeddings = compute_doc_embeddings_hf(df, model_lang)
+        else:
+            embeddings = compute_doc_embeddings(df)
+
+    target = url.query
+    answer = ""
+
+    if embedding_extractor == "hf":
+        answer  = answer_query_with_context(target, df, embeddings, embedding_type="hf", model_lang=model_lang)
+    else:
+        answer  = answer_query_with_context(target, df, embeddings, embedding_type="openai", model_lang=model_lang)
+
+    return {"answer": answer}
+    
+
