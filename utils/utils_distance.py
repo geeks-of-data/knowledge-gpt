@@ -1,5 +1,5 @@
 import numpy as np
-from utils_embedding import get_hf_embeddings, get_embedding
+from utils.utils_embedding import get_hf_embeddings, get_embedding
 
 def vector_similarity(x: list[float], y: list[float]) -> float:
     """
