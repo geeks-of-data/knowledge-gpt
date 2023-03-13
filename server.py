@@ -1,11 +1,11 @@
 from fastapi import FastAPI, File, UploadFile, Form, HTTPException
 from io import BytesIO
-from utils_pdf import process_pdf, process_pdf_page
-from utils_embedding import compute_doc_embeddings_hf,  compute_doc_embeddings
-from utils_completion import answer_query_with_context
-from utils_scrape import scrape_content
-from utils_subtitles import scrape_youtube
-from utils_powerpoint import process_pptx
+from utils.utils_pdf import process_pdf, process_pdf_page
+from utils.utils_embedding import compute_doc_embeddings_hf,  compute_doc_embeddings
+from utils.utils_completion import answer_query_with_context
+from utils.utils_scrape import scrape_content
+from utils.utils_subtitles import scrape_youtube
+from utils.utils_powerpoint import process_pptx
 from typing import Optional
 from models.search import SearchQuery
 from models.scrape import ScrapeQuery
@@ -18,6 +18,17 @@ app = FastAPI()
 df = None
 embeddings = None
 
+pdf_df = None
+pdf_embeddings = None
+
+pptx_df = None
+pptx_embeddings = None
+
+web_df = None
+web_embeddings = None
+
+yt_sub_df = None
+yt_sub_embeddings = None
 
 @app.get("/")
 async def root():
@@ -27,39 +38,44 @@ async def root():
 async def create_upload_file(file: UploadFile = File(...), extraction_type: Optional[str] = Form("default")):
     if file.content_type != "application/pdf":
         return {"error": "Only PDF files are allowed"}
-    
 
     pdf_buffer = BytesIO(await file.read())
 
-    global df
-
     print(extraction_type)
 
-    if extraction_type == "page":
-        df = process_pdf_page(pdf_buffer)
-    else:
-        df = process_pdf(pdf_buffer)
+    global pdf_df
 
-    paragraphs = df.to_dict('records')
+    if extraction_type == "page":
+        pdf_df = process_pdf_page(pdf_buffer)
+    else:
+        pdf_df = process_pdf(pdf_buffer)
+
+    paragraphs = pdf_df.to_dict('records')
 
     return {"paragraphs": paragraphs}
 
 
 @app.get("/embedding_calculation/")
 async def embedding_calculation():
-    global embeddings
-    embeddings = compute_doc_embeddings_hf(df, 'tr')
+
+    global pdf_embeddings
+    global pdf_df
+
+    pdf_embeddings = compute_doc_embeddings_hf(pdf_df, 'tr')
     
     return {"status": "done"}
 
 @app.post("/search/")
 async def search(query: SearchQuery):
 
+    global pdf_df
+    global pdf_embeddings
+
     target = query.query
     embedding_extractor_type = query.embedding_extractor
     model_lang = query.model_lang
 
-    answer  = answer_query_with_context(target, df, embeddings, embedding_type=embedding_extractor_type, model_lang=model_lang)
+    answer  = answer_query_with_context(target, pdf_df, pdf_embeddings, embedding_type=embedding_extractor_type, model_lang=model_lang)
     return {"answer": answer}
 
 
@@ -72,28 +88,29 @@ async def all_in_one(query: str = Form(""), extraction_type: str = Form("page"),
 
     pdf_buffer = BytesIO(await file.read())
 
-    global df
-    if df is None:
+    global pdf_df
+    global pdf_embeddings
+
+    if pdf_df is None:
         
         if extraction_type == "page":
-            df = process_pdf_page(pdf_buffer)
+            pdf_df = process_pdf_page(pdf_buffer)
         else:
-            df = process_pdf(pdf_buffer)
+            pdf_df = process_pdf(pdf_buffer)
 
-    global embeddings
-    if embeddings is None:
+    if pdf_embeddings is None:
         if embedding_extractor == "hf":
-            embeddings = compute_doc_embeddings_hf(df, model_lang)
+            pdf_embeddings = compute_doc_embeddings_hf(pdf_df, model_lang)
         else:
-            embeddings = compute_doc_embeddings(df)
+            pdf_embeddings = compute_doc_embeddings(pdf_df)
 
 
     target = query
     answer = ""
     if embedding_extractor == "hf":
-        answer  = answer_query_with_context(target, df, embeddings, embedding_type="hf", model_lang=model_lang)
+        answer  = answer_query_with_context(target, pdf_df, pdf_embeddings, embedding_type="hf", model_lang=model_lang)
     else:
-        answer  = answer_query_with_context(target, df, embeddings, embedding_type="openai", model_lang=model_lang)
+        answer  = answer_query_with_context(target, pdf_df, pdf_embeddings, embedding_type="openai", model_lang=model_lang)
     return {"answer": answer}
 
 @app.post("/scrape/")
@@ -107,24 +124,25 @@ async def scrape_website(url: ScrapeQuery):
     embedding_extractor = url.embedding_extractor
     model_lang = url.model_lang
     
-    global df
+    global web_df
+    global web_embeddings
 
-    df = scrape_content(url.url)
+    web_df = scrape_content(url.url)
 
-    global embeddings
-    if embeddings is None:
+
+    if web_embeddings is None:
         if embedding_extractor == "hf":
-            embeddings = compute_doc_embeddings_hf(df, model_lang)
+           web_embeddings = compute_doc_embeddings_hf(web_df, model_lang)
         else:
-            embeddings = compute_doc_embeddings(df)
+           web_embeddings = compute_doc_embeddings(web_df)
 
     target = url.query
     answer = ""
 
     if embedding_extractor == "hf":
-        answer  = answer_query_with_context(target, df, embeddings, embedding_type="hf", model_lang=model_lang)
+        answer  = answer_query_with_context(target, web_df,web_embeddings, embedding_type="hf", model_lang=model_lang)
     else:
-        answer  = answer_query_with_context(target, df, embeddings, embedding_type="openai", model_lang=model_lang)
+        answer  = answer_query_with_context(target, web_df,web_embeddings, embedding_type="openai", model_lang=model_lang)
 
     return {"answer": answer}
     
@@ -139,25 +157,25 @@ async def youtube_subtitles(query: YTSubsQuery):
     if not query.video_id:
         raise HTTPException(status_code=400, detail="Video ID is missing")
     
-    global df
+    global yt_sub_df
+    global yt_sub_embeddings
 
-    df = scrape_youtube(query.video_id)
+    yt_sub_df = scrape_youtube(query.video_id)
 
-    global embeddings
 
-    if embeddings is None:
+    if yt_sub_embeddings is None:
         if query.embedding_extractor == "hf":
-            embeddings = compute_doc_embeddings_hf(df, query.model_lang)
+           yt_sub_embeddings = compute_doc_embeddings_hf(yt_sub_df, query.model_lang)
         else:
-            embeddings = compute_doc_embeddings(df)
+           yt_sub_embeddings = compute_doc_embeddings(yt_sub_df)
     
     target = query.query
     answer = ""
 
     if query.embedding_extractor == "hf":
-        answer  = answer_query_with_context(target, df, embeddings, embedding_type="hf", model_lang=query.model_lang)
+        answer  = answer_query_with_context(target, yt_sub_df,yt_sub_embeddings, embedding_type="hf", model_lang=query.model_lang)
     else:
-        answer  = answer_query_with_context(target, df, embeddings, embedding_type="openai", model_lang=query.model_lang)
+        answer  = answer_query_with_context(target, yt_sub_df,yt_sub_embeddings, embedding_type="openai", model_lang=query.model_lang)
 
     return {"answer": answer}
 
@@ -171,22 +189,25 @@ async def powerpoint_scrape(query: str = Form(""),  embedding_extractor: str = F
     if file.content_type != "application/vnd.openxmlformats-officedocument.presentationml.presentation":
         return {"error": "Only Powerpoint files are allowed"}
     
-    pptx_buffer = BytesIO(await file.read())
-    df = process_pptx(pptx_buffer)
+    global pptx_df
+    global pptx_embeddings
 
-    global embeddings
-    if embeddings is None:
+    pptx_buffer = BytesIO(await file.read())
+    pptx_df = process_pptx(pptx_buffer)
+
+
+    if pptx_embeddings is None:
         if embedding_extractor == "hf":
-            embeddings = compute_doc_embeddings_hf(df, model_lang)
+           pptx_embeddings = compute_doc_embeddings_hf(pptx_df, model_lang)
         else:
-            embeddings = compute_doc_embeddings(df)
+           pptx_embeddings = compute_doc_embeddings(pptx_df)
 
     target = query
     answer = ""
 
     if embedding_extractor == "hf":
-        answer  = answer_query_with_context(target, df, embeddings, embedding_type="hf", model_lang=model_lang)
+        answer  = answer_query_with_context(target, pptx_df,pptx_embeddings, embedding_type="hf", model_lang=model_lang)
     else:
-        answer  = answer_query_with_context(target, df, embeddings, embedding_type="openai", model_lang=model_lang)
+        answer  = answer_query_with_context(target, pptx_df,pptx_embeddings, embedding_type="openai", model_lang=model_lang)
 
     return {"answer": answer}

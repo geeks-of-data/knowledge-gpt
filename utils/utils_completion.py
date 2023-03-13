@@ -1,4 +1,4 @@
-from utils_prompt import construct_prompt
+from utils.utils_prompt import construct_prompt
 import openai
 import pandas as pd
 import numpy as np

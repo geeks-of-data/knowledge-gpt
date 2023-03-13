@@ -1,4 +1,4 @@
-from utils_distance import order_document_sections_by_query_similarity
+from utils.utils_distance import order_document_sections_by_query_similarity
 import pandas as pd
 
 import tiktoken
