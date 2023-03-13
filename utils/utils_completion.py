@@ -36,4 +36,4 @@ def answer_query_with_context(
                 **COMPLETIONS_API_PARAMS
             )
 
-    return response["choices"][0]["text"].strip(" \n")
+    return response["choices"][0]["text"].strip(" \n"), prompt
