@@ -5,6 +5,7 @@ from utils_embedding import compute_doc_embeddings_hf,  compute_doc_embeddings
 from utils_completion import answer_query_with_context
 from utils_scrape import scrape_content
 from utils_subtitles import scrape_youtube
+from utils_powerpoint import process_pptx
 from typing import Optional
 from models.search import SearchQuery
 from models.scrape import ScrapeQuery
@@ -157,5 +158,35 @@ async def youtube_subtitles(query: YTSubsQuery):
         answer  = answer_query_with_context(target, df, embeddings, embedding_type="hf", model_lang=query.model_lang)
     else:
         answer  = answer_query_with_context(target, df, embeddings, embedding_type="openai", model_lang=query.model_lang)
+
+    return {"answer": answer}
+
+
+
+
+
+@app.post("/powerpoint_scrape/")
+async def powerpoint_scrape(query: str = Form(""),  embedding_extractor: str = Form("hf"), model_lang:str =Form("en") ,file: UploadFile = File(...)):
+
+    if file.content_type != "application/vnd.openxmlformats-officedocument.presentationml.presentation":
+        return {"error": "Only Powerpoint files are allowed"}
+    
+    pptx_buffer = BytesIO(await file.read())
+    df = process_pptx(pptx_buffer)
+
+    global embeddings
+    if embeddings is None:
+        if embedding_extractor == "hf":
+            embeddings = compute_doc_embeddings_hf(df, model_lang)
+        else:
+            embeddings = compute_doc_embeddings(df)
+
+    target = query
+    answer = ""
+
+    if embedding_extractor == "hf":
+        answer  = answer_query_with_context(target, df, embeddings, embedding_type="hf", model_lang=model_lang)
+    else:
+        answer  = answer_query_with_context(target, df, embeddings, embedding_type="openai", model_lang=model_lang)
 
     return {"answer": answer}
