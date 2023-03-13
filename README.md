@@ -15,7 +15,8 @@ uvicorn server:app --reload
 ## TODO
 - [ ] Add a database
 - [ ] Add a vector database
-- [ ] Add Whisper Model
+- [x] Add Whisper Model
+- [ ] Add Whisper for audio longer than 25MB
 - [ ] Add a web interface
 - [ ] Migrate to Promptify
 - [ ] Add ChatGPT support
