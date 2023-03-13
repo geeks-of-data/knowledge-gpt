@@ -28,3 +28,7 @@ uvicorn server:app --reload
 - [ ] Prompt-Answer storage
 
 ( To be extended...)
+
+## System Architecture
+
+![System Architecture](/knowledgebase/public/Knowledge-ex.png)
