@@ -13,6 +13,11 @@ from models.search import SearchQuery
 from models.scrape import ScrapeQuery
 from models.yt_subs import YTSubsQuery
 from fastapi import HTTPException
+from config import MONGO_URI
+from pymongo import MongoClient
+
+client  = MongoClient(MONGO_URI)
+db = client.openai_test
 
 
 app = FastAPI()
@@ -83,7 +88,7 @@ async def search(query: SearchQuery):
     embedding_extractor_type = query.embedding_extractor
     model_lang = query.model_lang
 
-    answer  = answer_query_with_context(target, pdf_df, pdf_embeddings, embedding_type=embedding_extractor_type, model_lang=model_lang)
+    answer, prompt  = answer_query_with_context(target, pdf_df, pdf_embeddings, embedding_type=embedding_extractor_type, model_lang=model_lang)
     return {"answer": answer}
 
 
@@ -116,9 +121,9 @@ async def all_in_one(query: str = Form(""), extraction_type: str = Form("page"),
     target = query
     answer = ""
     if embedding_extractor == "hf":
-        answer  = answer_query_with_context(target, pdf_df, pdf_embeddings, embedding_type="hf", model_lang=model_lang)
+        answer, prompt  = answer_query_with_context(target, pdf_df, pdf_embeddings, embedding_type="hf", model_lang=model_lang)
     else:
-        answer  = answer_query_with_context(target, pdf_df, pdf_embeddings, embedding_type="openai", model_lang=model_lang)
+        answer, prompt  = answer_query_with_context(target, pdf_df, pdf_embeddings, embedding_type="openai", model_lang=model_lang)
     return {"answer": answer}
 
 @app.post("/scrape/")
@@ -148,9 +153,11 @@ async def scrape_website(url: ScrapeQuery):
     answer = ""
 
     if embedding_extractor == "hf":
-        answer  = answer_query_with_context(target, web_df,web_embeddings, embedding_type="hf", model_lang=model_lang)
+        answer, prompt  = answer_query_with_context(target, web_df,web_embeddings, embedding_type="hf", model_lang=model_lang)
     else:
-        answer  = answer_query_with_context(target, web_df,web_embeddings, embedding_type="openai", model_lang=model_lang)
+        answer, prompt  = answer_query_with_context(target, web_df,web_embeddings, embedding_type="openai", model_lang=model_lang)
+
+    db.pairs_web.insert_one({"query": target, "answer": answer, "prompt": prompt})
 
     return {"answer": answer}
     
@@ -181,9 +188,11 @@ async def youtube_subtitles(query: YTSubsQuery):
     answer = ""
 
     if query.embedding_extractor == "hf":
-        answer  = answer_query_with_context(target, yt_sub_df,yt_sub_embeddings, embedding_type="hf", model_lang=query.model_lang)
+        answer, prompt  = answer_query_with_context(target, yt_sub_df,yt_sub_embeddings, embedding_type="hf", model_lang=query.model_lang)
     else:
-        answer  = answer_query_with_context(target, yt_sub_df,yt_sub_embeddings, embedding_type="openai", model_lang=query.model_lang)
+        answer, prompt  = answer_query_with_context(target, yt_sub_df,yt_sub_embeddings, embedding_type="openai", model_lang=query.model_lang)
+
+    db.pairs_yt.insert_one({"query": target, "answer": answer, "prompt": prompt})
 
     return {"answer": answer}
 
@@ -211,9 +220,11 @@ async def powerpoint_scrape(query: str = Form(""),  embedding_extractor: str = F
     answer = ""
 
     if embedding_extractor == "hf":
-        answer  = answer_query_with_context(target, pptx_df,pptx_embeddings, embedding_type="hf", model_lang=model_lang)
+        answer, prompt  = answer_query_with_context(target, pptx_df,pptx_embeddings, embedding_type="hf", model_lang=model_lang)
     else:
-        answer  = answer_query_with_context(target, pptx_df,pptx_embeddings, embedding_type="openai", model_lang=model_lang)
+        answer, prompt  = answer_query_with_context(target, pptx_df,pptx_embeddings, embedding_type="openai", model_lang=model_lang)
+
+    db.pairs_pptx.insert_one({"query": target, "answer": answer, "prompt": prompt})
 
     return {"answer": answer}
 
@@ -244,6 +255,8 @@ async def youtube_audio_embeddings(query: YTSubsQuery):
     else:
         answer = answer_query_with_context(target, yt_audio_df,yt_audio_embeddings, embedding_type="openai", model_lang=query.model_lang)
 
+    db.pairs_yt_audio.insert_one({"query": target, "answer": answer})
+
     return {"answer": answer}
 
 
@@ -270,8 +283,10 @@ async def docs_scrape(query: str = Form(""),  embedding_extractor: str = Form("h
     answer = ""
 
     if embedding_extractor == "hf":
-        answer  = answer_query_with_context(target, docs_df,docs_embeddings, embedding_type="hf", model_lang=model_lang)
+        answer, prompt  = answer_query_with_context(target, docs_df,docs_embeddings, embedding_type="hf", model_lang=model_lang)
     else:
-        answer  = answer_query_with_context(target, docs_df,docs_embeddings, embedding_type="openai", model_lang=model_lang)
+        answer, prompt  = answer_query_with_context(target, docs_df,docs_embeddings, embedding_type="openai", model_lang=model_lang)
+
+    db.pairs_docs.insert_one({"query": target, "answer": answer, "prompt": prompt})
 
     return {"answer": answer}
