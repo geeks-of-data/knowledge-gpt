@@ -7,6 +7,7 @@ from utils.utils_scrape import scrape_content
 from utils.utils_subtitles import scrape_youtube
 from utils.utils_powerpoint import process_pptx
 from utils.utils_yt_whisper import transcribe_youtube_audio
+from utils.utils_docs import extract_paragraphs
 from typing import Optional
 from models.search import SearchQuery
 from models.scrape import ScrapeQuery
@@ -33,6 +34,9 @@ yt_sub_embeddings = None
 
 yt_audio_df = None
 yt_audio_embeddings = None
+
+docs_df = None
+docs_embeddings = None
 
 @app.get("/")
 async def root():
@@ -239,5 +243,35 @@ async def youtube_audio_embeddings(query: YTSubsQuery):
         answer = answer_query_with_context(target, yt_audio_df,yt_audio_embeddings, embedding_type="hf", model_lang=query.model_lang)
     else:
         answer = answer_query_with_context(target, yt_audio_df,yt_audio_embeddings, embedding_type="openai", model_lang=query.model_lang)
+
+    return {"answer": answer}
+
+
+
+@app.post("/docs_scrape/")
+async def docs_scrape(query: str = Form(""),  embedding_extractor: str = Form("hf"), model_lang:str =Form("en") ,file: UploadFile = File(...)):
+    if file.content_type != "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+        return {"error": "Only Word files are allowed"}
+    
+    global docs_df
+    global docs_embeddings
+
+    docs_buffer = BytesIO(await file.read())
+    docs_df = extract_paragraphs(docs_buffer)
+
+
+    if docs_embeddings is None:
+        if embedding_extractor == "hf":
+           docs_embeddings = compute_doc_embeddings_hf(docs_df, model_lang)
+        else:
+           docs_embeddings = compute_doc_embeddings(docs_df)
+
+    target = query
+    answer = ""
+
+    if embedding_extractor == "hf":
+        answer  = answer_query_with_context(target, docs_df,docs_embeddings, embedding_type="hf", model_lang=model_lang)
+    else:
+        answer  = answer_query_with_context(target, docs_df,docs_embeddings, embedding_type="openai", model_lang=model_lang)
 
     return {"answer": answer}

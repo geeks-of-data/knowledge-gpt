@@ -1,7 +1,5 @@
 .env
 config.py
-knowledge_book.pdf
-cookbook_tr.pdf
 .ipynb_checkpoints
 __pycache__
 *.webm
@@ -12,3 +10,7 @@ __pycache__
 *.flac
 *.vtt
 *.pptx
+*.ppt
+*.docx
+*.xlsx
+*.pdf
