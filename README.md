@@ -12,6 +12,15 @@ uvicorn server:app --reload
 3. Make your changes
 4. Create a pull request
 
+## FEATURES
+- [x] Extract knowledge from the internet (i.e. Wikipedia)
+- [x] Extract knowledge from local data sources - PDF
+- [x] Extract knowledge from local data sources - DOCX
+- [x] Extract knowledge from local data sources - PPTX
+- [x] Extract knowledge from youtube audio (when caption is not available)
+- [x] Extract knowledge from youtube captions
+
+
 ## TODO
 - [ ] Add a database
 - [ ] Add a vector database
