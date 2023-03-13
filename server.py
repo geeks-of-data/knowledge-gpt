@@ -6,6 +6,7 @@ from utils.utils_completion import answer_query_with_context
 from utils.utils_scrape import scrape_content
 from utils.utils_subtitles import scrape_youtube
 from utils.utils_powerpoint import process_pptx
+from utils.utils_yt_whisper import transcribe_youtube_audio
 from typing import Optional
 from models.search import SearchQuery
 from models.scrape import ScrapeQuery
@@ -29,6 +30,9 @@ web_embeddings = None
 
 yt_sub_df = None
 yt_sub_embeddings = None
+
+yt_audio_df = None
+yt_audio_embeddings = None
 
 @app.get("/")
 async def root():
@@ -180,9 +184,6 @@ async def youtube_subtitles(query: YTSubsQuery):
     return {"answer": answer}
 
 
-
-
-
 @app.post("/powerpoint_scrape/")
 async def powerpoint_scrape(query: str = Form(""),  embedding_extractor: str = Form("hf"), model_lang:str =Form("en") ,file: UploadFile = File(...)):
 
@@ -209,5 +210,34 @@ async def powerpoint_scrape(query: str = Form(""),  embedding_extractor: str = F
         answer  = answer_query_with_context(target, pptx_df,pptx_embeddings, embedding_type="hf", model_lang=model_lang)
     else:
         answer  = answer_query_with_context(target, pptx_df,pptx_embeddings, embedding_type="openai", model_lang=model_lang)
+
+    return {"answer": answer}
+
+
+
+@app.post("/youtube_audio_embeddings/")
+async def youtube_audio_embeddings(query: YTSubsQuery):
+    if not query.video_id:
+        raise HTTPException(status_code=400, detail="Video ID is missing")
+    
+    global yt_audio_df
+    global yt_audio_embeddings
+
+    if yt_audio_df is None:
+        yt_audio_df = transcribe_youtube_audio(query.video_id)
+
+    if yt_audio_embeddings is None:
+        if query.embedding_extractor == "hf":
+           yt_audio_embeddings = compute_doc_embeddings_hf(yt_audio_df, query.model_lang)
+        else:
+           yt_audio_embeddings = compute_doc_embeddings(yt_audio_df)
+
+    target = query.query
+    answer = ""
+
+    if query.embedding_extractor == "hf":
+        answer = answer_query_with_context(target, yt_audio_df,yt_audio_embeddings, embedding_type="hf", model_lang=query.model_lang)
+    else:
+        answer = answer_query_with_context(target, yt_audio_df,yt_audio_embeddings, embedding_type="openai", model_lang=query.model_lang)
 
     return {"answer": answer}
