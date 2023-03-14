@@ -5,3 +5,4 @@ class ScrapeQuery(BaseModel):
     embedding_extractor: str
     model_lang: str
     query: str
+    to_save: str
