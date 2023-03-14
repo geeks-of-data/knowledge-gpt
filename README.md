@@ -42,4 +42,4 @@ uvicorn server:app --reload
 
 ## System Architecture
 
-![System Architecture](/knowledgebase/public/Knowledge-ex.png)
+![System Architecture](./public/Knowledge-ex.png)
