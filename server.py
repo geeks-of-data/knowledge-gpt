@@ -93,7 +93,7 @@ async def search(query: SearchQuery):
 
 
 @app.post("/all_in_one/")
-async def all_in_one(query: str = Form(""), extraction_type: str = Form("page"), embedding_extractor: str = Form("hf"), model_lang:str =Form("en") ,file: UploadFile = File(...)):
+async def all_in_one(query: str = Form(""), extraction_type: str = Form("page"), embedding_extractor: str = Form("hf"), model_lang:str =Form("en"), to_save:str=Form("false") ,file: UploadFile = File(...)):
     if file.content_type != "application/pdf":
         return {"error": "Only PDF files are allowed"}
     
@@ -124,6 +124,10 @@ async def all_in_one(query: str = Form(""), extraction_type: str = Form("page"),
         answer, prompt  = answer_query_with_context(target, pdf_df, pdf_embeddings, embedding_type="hf", model_lang=model_lang)
     else:
         answer, prompt  = answer_query_with_context(target, pdf_df, pdf_embeddings, embedding_type="openai", model_lang=model_lang)
+
+    if to_save == "true":
+        db.pairs_pdf.insert_one({"query": target, "answer": answer, "prompt": prompt})
+    
     return {"answer": answer}
 
 @app.post("/scrape/")
@@ -157,7 +161,8 @@ async def scrape_website(url: ScrapeQuery):
     else:
         answer, prompt  = answer_query_with_context(target, web_df,web_embeddings, embedding_type="openai", model_lang=model_lang)
 
-    db.pairs_web.insert_one({"query": target, "answer": answer, "prompt": prompt})
+    if url.to_save=="true":
+        db.pairs_web.insert_one({"query": target, "answer": answer, "prompt": prompt})
 
     return {"answer": answer}
     
@@ -192,13 +197,14 @@ async def youtube_subtitles(query: YTSubsQuery):
     else:
         answer, prompt  = answer_query_with_context(target, yt_sub_df,yt_sub_embeddings, embedding_type="openai", model_lang=query.model_lang)
 
-    db.pairs_yt.insert_one({"query": target, "answer": answer, "prompt": prompt})
+    if query.to_save=="true":
+        db.pairs_yt.insert_one({"query": target, "answer": answer, "prompt": prompt})
 
     return {"answer": answer}
 
 
 @app.post("/powerpoint_scrape/")
-async def powerpoint_scrape(query: str = Form(""),  embedding_extractor: str = Form("hf"), model_lang:str =Form("en") ,file: UploadFile = File(...)):
+async def powerpoint_scrape(query: str = Form(""),  embedding_extractor: str = Form("hf"), model_lang:str =Form("en") , to_save:str = Form("false") ,file: UploadFile = File(...)):
 
     if file.content_type != "application/vnd.openxmlformats-officedocument.presentationml.presentation":
         return {"error": "Only Powerpoint files are allowed"}
@@ -224,7 +230,8 @@ async def powerpoint_scrape(query: str = Form(""),  embedding_extractor: str = F
     else:
         answer, prompt  = answer_query_with_context(target, pptx_df,pptx_embeddings, embedding_type="openai", model_lang=model_lang)
 
-    db.pairs_pptx.insert_one({"query": target, "answer": answer, "prompt": prompt})
+    if to_save=="true":
+        db.pairs_pptx.insert_one({"query": target, "answer": answer, "prompt": prompt})
 
     return {"answer": answer}
 
@@ -251,18 +258,19 @@ async def youtube_audio_embeddings(query: YTSubsQuery):
     answer = ""
 
     if query.embedding_extractor == "hf":
-        answer = answer_query_with_context(target, yt_audio_df,yt_audio_embeddings, embedding_type="hf", model_lang=query.model_lang)
+        answer,prompt = answer_query_with_context(target, yt_audio_df,yt_audio_embeddings, embedding_type="hf", model_lang=query.model_lang)
     else:
-        answer = answer_query_with_context(target, yt_audio_df,yt_audio_embeddings, embedding_type="openai", model_lang=query.model_lang)
+        answer, prompt = answer_query_with_context(target, yt_audio_df,yt_audio_embeddings, embedding_type="openai", model_lang=query.model_lang)
 
-    db.pairs_yt_audio.insert_one({"query": target, "answer": answer})
+    if query.to_save=="true":
+        db.pairs_yt_audio.insert_one({"query": target, "answer": answer, "prompt": prompt})
 
     return {"answer": answer}
 
 
 
 @app.post("/docs_scrape/")
-async def docs_scrape(query: str = Form(""),  embedding_extractor: str = Form("hf"), model_lang:str =Form("en") ,file: UploadFile = File(...)):
+async def docs_scrape(query: str = Form(""),  embedding_extractor: str = Form("hf"), model_lang:str =Form("en") , to_save:str = Form("false") ,file: UploadFile = File(...)):
     if file.content_type != "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
         return {"error": "Only Word files are allowed"}
     
@@ -287,6 +295,7 @@ async def docs_scrape(query: str = Form(""),  embedding_extractor: str = Form("h
     else:
         answer, prompt  = answer_query_with_context(target, docs_df,docs_embeddings, embedding_type="openai", model_lang=model_lang)
 
-    db.pairs_docs.insert_one({"query": target, "answer": answer, "prompt": prompt})
+    if to_save:
+        db.pairs_docs.insert_one({"query": target, "answer": answer, "prompt": prompt})
 
     return {"answer": answer}

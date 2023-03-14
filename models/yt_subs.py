@@ -5,3 +5,4 @@ class YTSubsQuery(BaseModel):
     query: str
     model_lang: str
     embedding_extractor: str
+    to_save: str
