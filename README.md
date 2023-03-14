@@ -28,7 +28,8 @@ uvicorn server:app --reload
 - [ ] Add Whisper for audio longer than 25MB
 - [ ] Add a web interface
 - [ ] Migrate to Promptify
-- [ ] Add ChatGPT support
+- [x] Add ChatGPT support (only in docs endpoint and experimental)
+- [ ] Add ChatGPT support with a better infrastructure and planning
 - [ ] Increase the number of prompts
 - [ ] Increase the number of supported knowledge sources
 - [ ] Increase the number of supported languages
