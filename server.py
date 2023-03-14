@@ -43,6 +43,8 @@ yt_audio_embeddings = None
 docs_df = None
 docs_embeddings = None
 
+messages = []
+
 @app.get("/")
 async def root():
     return {"message": "Hello World"}
@@ -270,7 +272,7 @@ async def youtube_audio_embeddings(query: YTSubsQuery):
 
 
 @app.post("/docs_scrape/")
-async def docs_scrape(query: str = Form(""),  embedding_extractor: str = Form("hf"), model_lang:str =Form("en") , to_save:str = Form("false") ,file: UploadFile = File(...)):
+async def docs_scrape(query: str = Form(""),  embedding_extractor: str = Form("hf"), model_lang:str =Form("en") , to_save:str = Form("false"), is_turbo:str = Form("false") ,file: UploadFile = File(...)):
     if file.content_type != "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
         return {"error": "Only Word files are allowed"}
     
@@ -290,12 +292,27 @@ async def docs_scrape(query: str = Form(""),  embedding_extractor: str = Form("h
     target = query
     answer = ""
 
-    if embedding_extractor == "hf":
-        answer, prompt  = answer_query_with_context(target, docs_df,docs_embeddings, embedding_type="hf", model_lang=model_lang)
-    else:
-        answer, prompt  = answer_query_with_context(target, docs_df,docs_embeddings, embedding_type="openai", model_lang=model_lang)
+    global messages
 
-    if to_save:
+    if len(messages) == 0 and is_turbo=="true":
+        messages = [
+        {"role": "system", "content": "you are a helpful assistant"},
+        ]
+
+    is_first_time = True
+    if len(messages) > 2:
+        is_first_time = False
+        print("not first time")
+
+    if embedding_extractor == "hf":
+        answer, prompt, messages  = answer_query_with_context(target, docs_df,docs_embeddings, embedding_type="hf", model_lang=model_lang, is_turbo=is_turbo, messages=messages, is_first_time=is_first_time)
+    else:
+        answer, prompt, messages  = answer_query_with_context(target, docs_df,docs_embeddings, embedding_type="openai", model_lang=model_lang, is_turbo=is_turbo, messages=messages, is_first_time=is_first_time)
+
+    if to_save=="true" and is_turbo=="false":
         db.pairs_docs.insert_one({"query": target, "answer": answer, "prompt": prompt})
+    else:
+        db.pairs_docs_turbo.insert_one({"conversation": messages})
 
     return {"answer": answer}
+
