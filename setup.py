@@ -38,6 +38,7 @@ setuptools.setup(
         "tiktoken",
         "pydub",
         "PyPDF2",
+        "python-pptx",
     ],
     python_requires=">=3.7",
 )
