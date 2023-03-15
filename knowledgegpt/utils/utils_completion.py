@@ -1,21 +1,20 @@
-from utils.utils_prompt import construct_prompt
+# https://github.com/openai/openai-cookbook/blob/main/examples/Question_answering_using_embeddings.ipynb sourced from here
+from knowledgegpt.utils.utils_prompt import construct_prompt
 import openai
 import pandas as pd
 import numpy as np
-from config import SECRET_KEY
 
-openai.api_key = SECRET_KEY
 
 COMPLETIONS_API_PARAMS = {
     "temperature": 0.0,
-    "max_tokens": 1000,
     "model": "text-davinci-003",
+    "max_tokens": 1000,
 }
 
 COMPLETIONS_API_PARAMS_TURBO = {
     "temperature": 0.0,
-    "max_tokens": 1000,
     "model": "gpt-3.5-turbo",
+    "max_tokens": 1000,
 }
 
 def answer_query_with_context(
@@ -27,8 +26,29 @@ def answer_query_with_context(
     model_lang: str = "en",
     is_turbo: str = "false",
     messages: list = None,
-    is_first_time: bool = True
+    is_first_time: bool = True,
+    max_tokens = 1000
 ) -> str:
+    
+    """
+    Answer a query using the provided context.
+    :param query: The query to answer.
+    :param df: The dataframe containing the document sections.
+    :param document_embeddings: The embeddings of the document sections.    
+    :param show_prompt: Whether to print the prompt.
+    :param embedding_type: The type of embedding used. Can be "hf" or "tf".
+    :param model_lang: The language of the model. Can be "en" or "tr".
+    :param is_turbo: Whether to use turbo model or not. Can be "true" or "false".
+    :param messages: The messages to be used in turbo model.
+    :param is_first_time: Whether it is the first time to use turbo model or not.
+    :param max_tokens: The maximum number of tokens to be used in turbo model.
+    :return: The answer to the query.
+
+    """
+
+    COMPLETIONS_API_PARAMS["max_tokens"] = max_tokens
+    COMPLETIONS_API_PARAMS_TURBO["max_tokens"] = max_tokens
+
     
     if is_first_time==True:
 
@@ -37,7 +57,8 @@ def answer_query_with_context(
         document_embeddings,
         df,
         embedding_type=embedding_type,
-        model_lang=model_lang
+        model_lang=model_lang,
+        max_tokens=max_tokens
     )
         if is_turbo=="true":
             messages.append({"role": "user", "content": prompt})

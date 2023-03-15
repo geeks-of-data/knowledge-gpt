@@ -1,4 +1,6 @@
 <!-- Use the context of other files to complete here -->
+![Knowledgebase](./public/logo.png)
+
 # Knowledgebase 
 
 This is a repo for extracting knowledge from the internet or from other local data sources to form-up prompts.
@@ -7,6 +9,7 @@ This is a repo for extracting knowledge from the internet or from other local da
 uvicorn server:app --reload
 
 ## How to contribute
+0. Open an issue
 1. Fork the repo
 2. Create a new branch
 3. Make your changes
@@ -18,11 +21,12 @@ uvicorn server:app --reload
 - [x] Extract knowledge from local data sources - DOCX
 - [x] Extract knowledge from local data sources - PPTX
 - [x] Extract knowledge from youtube audio (when caption is not available)
-- [x] Extract knowledge from youtube captions
+- [x] Extract knowledge from youtube transcripts
+- [x] Library implementation (partially done, initial release)
 
 
 ## TODO
-- [ ] Add a database
+- [x] Add a database (partially done)
 - [ ] Add a vector database
 - [x] Add Whisper Model
 - [ ] Add Whisper for audio longer than 25MB
@@ -37,9 +41,14 @@ uvicorn server:app --reload
 - [ ] Dockerize the project
 - [ ] Advanced web scraping
 - [ ] Prompt-Answer storage
+- [ ] Add a better documentation
+- [ ] Check library functions to see if they are working properly
+- [ ] Add a better logging system
+- [ ] Add a better error handling system
+- [ ] Add a better testing system
 
 ( To be extended...)
 
 ## System Architecture
 
-![System Architecture](./public/Knowledge-ex.png)
+![System Architecture](./public/Knowledge-ex.png)p

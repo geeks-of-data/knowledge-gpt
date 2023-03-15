@@ -5,17 +5,18 @@ import re
 import pandas as pd
 import openai
 import yt_dlp
-from config import SECRET_KEY
 
-
-openai.api_key = SECRET_KEY
 
 # currently not working for files > 25MB
 # TODO: split audio into chunks of 25MB and transcribe each chunk
 
 def transcribe_youtube_audio(url):
-    # Download audio from YouTube
-
+    """
+    Function that takes a YouTube video URL as input and returns the captions
+    as a pandas DataFrame with the key "caption".
+    :param url: YouTube video URL
+    :return: Pandas DataFrame with the key "caption"
+    """
     options = {
         "format": "bestaudio/best",
         "outtmpl": "audio.%(ext)s",
@@ -46,17 +47,14 @@ def transcribe_youtube_audio(url):
             # audio_segment.export(mp3_chunk, format="mp3")
             # mp3_chunk.seek(0)
 
-        # Transcribe the chunk
+
         transcript = openai.Audio.transcribe("whisper-1", f)
         text = transcript["text"]
-        # Split transcript into paragraphs
+
         new_paragraphs = re.findall(r"(.*?\.)(?=\s|$)", text, re.DOTALL)
         new_paragraphs = [p.strip() for p in new_paragraphs]
         new_paragraphs = [p for p in new_paragraphs if len(p) > 0]
         
-        # Add new paragraphs to list
         paragraphs += new_paragraphs
-    
-    # Return paragraphs as DataFrame
     df = pd.DataFrame({"content": paragraphs})
     return df

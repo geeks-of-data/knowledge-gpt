@@ -3,6 +3,11 @@ import pandas as pd
 
 
 def process_pptx(pptx_file):
+    """
+    Extracts paragraphs from a Powerpoint file
+    :param pptx_file: Powerpoint file
+    :return: Dataframe with paragraphs
+    """
 
     prs = pptx.Presentation(pptx_file)
     
