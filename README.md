@@ -23,12 +23,16 @@ or
 git clone https://github.com/geeks-of-data/knowledge-gpt.git
 pip install .
 ```
+Before running for the first time download the related spacy model by running:
+```
+# !python3 -m spacy download en_core_web_sm
+```
 
 #### How to use the library
 
 ```
 # Import the library
-from knowledgegpt.extractors.web_scrape_extractor import scrape_website
+from knowledgegpt.extractors.web_scrape_extractor import WebScrapeExtractor
 
 # Import OpenAI and Set the API Key
 import openai
@@ -46,8 +50,11 @@ db = client.openai_test
 # Define target website
 url = "https://en.wikipedia.org/wiki/Bombard_(weapon)"
 
+# Initialize the WebScrapeExtractor
+scrape_website = WebScrapeExtractor( url=url, embedding_extractor="hf", model_lang="en")
+
 # Prompt the OpenAI Model
-answer, prompt, messages = scrape_website(db, url, embedding_extractor="hf", model_lang="en", max_tokens=200, query="What is a bombard?", to_save=True)
+answer, prompt, messages = scrape_website.extract(query="What is a bombard?",max_tokens=300,  to_save=True, mongo_client=db)
 
 # See the answer
 print(answer)
