@@ -1,12 +1,62 @@
 <!-- Use the context of other files to complete here -->
-![Knowledgebase](./public/logo.png)
+![knowledgegpt](./public/logo.png)
 
-# Knowledgebase 
+# knowledgegpt 
 
-This is a repo for extracting knowledge from the internet or from other local data sources to form-up prompts.
+***knowledgegpt*** is designed to gather information from various sources, including the internet and local data, which can be used to create prompts. These prompts can then be utilized by OpenAI's GPT-3 model to generate answers that are subsequently stored in a database for future reference.
+
+To accomplish this, the text is first transformed into a fixed-size vector using either open source or OpenAI models. When a query is submitted, the text is also transformed into a vector and compared to the stored knowledge embeddings. The most relevant information is then selected and used to generate a prompt context.
+
+***knowledgegpt*** supports various information sources including websites, PDFs, PowerPoint files (PPTX), and documents (Docs). Additionally, it can extract text from YouTube subtitles and audio (using speech-to-text technology) and use it as a source of information. This allows for a diverse range of information to be gathered and used for generating prompts and answers.
 
 ## How to use
-uvicorn server:app --reload
+
+#### Restful API
+
+```uvicorn server:app --reload```
+
+#### How to install the library
+
+```pip install knowledgegpt```
+or
+```
+git clone https://github.com/geeks-of-data/knowledge-gpt.git
+pip install .
+```
+
+#### How to use the library
+
+```
+# Import the library
+from knowledgegpt.extractors.web_scrape_extractor import scrape_website
+
+# Import OpenAI and Set the API Key
+import openai
+from config import SECRET_KEY
+openai.api_key = SECRET_KEY
+
+
+# If you want to use mongodb to store the data
+from config import MONGO_URI
+from pymongo import MongoClient
+
+client  = MongoClient(MONGO_URI)
+db = client.openai_test
+
+# Define target website
+url = "https://en.wikipedia.org/wiki/Bombard_(weapon)"
+
+# Prompt the OpenAI Model
+answer, prompt, messages = scrape_website(db, url, embedding_extractor="hf", model_lang="en", max_tokens=200, query="What is a bombard?", to_save=True)
+
+# See the answer
+print(answer)
+
+# Output: 'A bombard is a type of large cannon used during the 14th to 15th centuries.'
+
+```
+
+
 
 ## How to contribute
 0. Open an issue
@@ -51,4 +101,4 @@ uvicorn server:app --reload
 
 ## System Architecture
 
-![System Architecture](./public/Knowledge-ex.png)p
+![System Architecture](./public/Knowledge-ex.png)
