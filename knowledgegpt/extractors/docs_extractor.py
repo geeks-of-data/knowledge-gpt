@@ -6,13 +6,17 @@ from ..utils.utils_completion import answer_query_with_context
 from io import BytesIO
 
 class DocsExtractor:
-    def __init__(self, mongo_client):
-        self.mongo_client = mongo_client
+    def __init__(self,file_path: str,  embedding_extractor: str = "hf", model_lang: str = "en",  is_turbo: bool = False):
+        self.file_path=file_path
+        self.embedding_extractor = embedding_extractor
+        self.model_lang = model_lang
+        self.is_turbo = is_turbo
+        self.mongo_client = None
         self.df = None
         self.embeddings = None
         self.messages = []
         
-    def extract(self, file_path: str, query: str, max_tokens, embedding_extractor: str = "hf", model_lang: str = "en", to_save: str = "false", is_turbo: str = "false") -> dict:
+    def extract(self, query: str, max_tokens, to_save: bool = False,mongo_client=None) -> dict:
         """
         Extracts paragraphs from a Word file and computes embeddings for each paragraph, then answers a query using the embeddings.
         :param file_path: Path to the Word file
@@ -26,17 +30,17 @@ class DocsExtractor:
         """
         print("Processing Word file...")
 
-        if not os.path.isfile(file_path):
+        if not os.path.isfile(self.file_path):
             return {"error": "File not found"}
 
-        _, ext = os.path.splitext(file_path)
+        _, ext = os.path.splitext(self.file_path)
         allowed_ext = [".doc", ".docx"]
         if ext not in allowed_ext:
             return {"error": "Only Word files are allowed"}
 
         print("Extracting paragraphs...")
 
-        with open(file_path, "rb") as f:
+        with open(self.file_path, "rb") as f:
             docs_buffer = BytesIO(f.read())
 
         self.df = extract_paragraphs(docs_buffer)
@@ -44,8 +48,8 @@ class DocsExtractor:
         print("Computing embeddings...")
 
         if self.embeddings is None:
-            if embedding_extractor == "hf":
-                self.embeddings = compute_doc_embeddings_hf(self.df, model_lang)
+            if self.embedding_extractor == "hf":
+                self.embeddings = compute_doc_embeddings_hf(self.df, self.model_lang)
             else:
                 self.embeddings = compute_doc_embeddings(self.df)
 
@@ -54,7 +58,7 @@ class DocsExtractor:
 
         print("Answering query...")
 
-        if len(self.messages) == 0 and is_turbo == "true":
+        if len(self.messages) == 0 and self.is_turbo == True:
             self.messages = [{"role": "system", "content": "you are a helpful assistant"}]
 
         is_first_time = True
@@ -62,15 +66,18 @@ class DocsExtractor:
             is_first_time = False
             print("not first time")
 
-        if embedding_extractor == "hf":
-            answer, prompt, self.messages = answer_query_with_context(target, self.df, self.embeddings, embedding_type="hf", model_lang=model_lang, is_turbo=is_turbo, messages=self.messages, is_first_time=is_first_time, max_tokens=max_tokens)
+        if self.embedding_extractor == "hf":
+            answer, prompt, self.messages = answer_query_with_context(target, self.df, self.embeddings, embedding_type="hf", model_lang=self.model_lang, is_turbo=self.is_turbo, messages=self.messages, is_first_time=is_first_time, max_tokens=max_tokens)
         else:
-            answer, prompt, self.messages = answer_query_with_context(target, self.df, self.embeddings, embedding_type="openai", model_lang=model_lang, is_turbo=is_turbo, messages=self.messages, is_first_time=is_first_time, max_tokens=max_tokens)
+            answer, prompt, self.messages = answer_query_with_context(target, self.df, self.embeddings, embedding_type="openai", model_lang=self.model_lang, is_turbo=self.is_turbo, messages=self.messages, is_first_time=is_first_time, max_tokens=max_tokens)
 
-        if to_save == "true" and is_turbo == "false":
-            self.mongo_client.pairs_docs.insert_one({"query": target, "answer": answer, "prompt": prompt})
-        else:
-            self.mongo_client.pairs_docs_turbo.insert_one({"conversation": self.messages})
+        if to_save == True:
+            print("Saving to Mongo...")
+            self.mongo_client = mongo_client
+            if  self.is_turbo == False:
+                self.mongo_client.pairs_docs.insert_one({"query": target, "answer": answer, "prompt": prompt})
+            else:
+                self.mongo_client.pairs_docs_turbo.insert_one({"conversation": self.messages})
 
         print("Done!")
 
