@@ -5,7 +5,7 @@ from io import BytesIO
 from typing import Optional, Tuple, List
 
 class PDFExtractor:
-    def __init__(self, mongo_client, max_tokens, extraction_type: str = "page", embedding_extractor: str = "hf", model_lang: str = "en", to_save: bool = False):
+    def __init__(self, pdf_file_path: str, extraction_type: str = "page", embedding_extractor: str = "hf", model_lang: str = "en"):
         """
         Extracts paragraphs from a PDF file and computes embeddings for each paragraph, then answers a query using the embeddings.
         :param extraction_type: Type of extraction to use. Options are "page" and "paragraph"
@@ -15,16 +15,16 @@ class PDFExtractor:
         :param max_tokens: Maximum number of tokens to use for the answer
         :param mongo_client: MongoDB client
         """
-        self.mongo_client = mongo_client
-        self.max_tokens = max_tokens
+        self.pdf_file_path =pdf_file_path
+        self.mongo_client = None
+        self.max_tokens = 1000
         self.extraction_type = extraction_type
         self.embedding_extractor = embedding_extractor
         self.model_lang = model_lang
-        self.to_save = to_save
         self.pdf_df = None
         self.pdf_embeddings = None
     
-    def extract(self, query: str, pdf_file_path: str) -> Tuple[str, Optional[str], List[str]]:
+    def extract(self, query: str,max_tokens=None, to_save=False,  mongo_client=None ) -> Tuple[str, Optional[str], List[str]]:
         """
         Extracts paragraphs from a PDF file and computes embeddings for each paragraph, then answers a query using the embeddings.
         :param query: Query to answer
@@ -33,7 +33,10 @@ class PDFExtractor:
         """
         print("Processing PDF file...")
 
-        with open(pdf_file_path, "rb") as f:
+        if max_tokens is not None:
+            self.max_tokens = max_tokens
+
+        with open(self.pdf_file_path, "rb") as f:
             pdf_file = BytesIO(f.read())
 
         if pdf_file.getvalue()[:4] != b'%PDF':
@@ -64,7 +67,9 @@ class PDFExtractor:
         else:
             answer, prompt, messages = answer_query_with_context(target, self.pdf_df, self.pdf_embeddings, embedding_type="openai", model_lang=self.model_lang, max_tokens=self.max_tokens)
 
-        if self.to_save:
+        if to_save:
+            print("Saving to MongoDB...")
+            self.mongo_client = mongo_client
             self.mongo_client.pair_pdf.insert_one({"query": target, "answer": answer, "prompt": prompt})
 
         print("Done!")

@@ -6,15 +6,16 @@ from ..utils.utils_completion import answer_query_with_context
 
 
 class WebScrapeExtractor:
-    def __init__(self, mongo_client, max_tokens: int, embedding_extractor: str, model_lang: str):
-        self.mongo_client = mongo_client
-        self.max_tokens = max_tokens
+    def __init__(self, url, embedding_extractor: str, model_lang: str):
+        self.url = url
         self.embedding_extractor = embedding_extractor
         self.model_lang = model_lang
+        self.max_tokens = 1000
+        self.mongo_client = None
         self.df = None
         self.embeddings = None
 
-    def extract(self, url: str, query: Optional[str] = None, to_save: bool = False):
+    def extract(self,  query: Optional[str] = None, max_tokens: int=1000, to_save: bool = False, mongo_client=None):
         """
         Function that takes a URL as input and returns the response answer.
         :param url: URL to scrape
@@ -27,12 +28,13 @@ class WebScrapeExtractor:
 
         """
         print("Scraping website...")
-        if not url:
-            raise ValueError("URL is missing")
+        if not self.url:
+            raise ValueError("url is missing")
 
+        if max_tokens is not None:
+            self.max_tokens = max_tokens
 
-
-        self.df = scrape_content(url)
+        self.df = scrape_content(self.url)
 
         print("Computing embeddings...")
 
@@ -57,6 +59,8 @@ class WebScrapeExtractor:
                                                                   max_tokens=self.max_tokens)
 
         if to_save:
+            print("Saving to Mongo...")
+            self.mongo_client = mongo_client
             self.mongo_client.pair_web.insert_one({"query": target, "answer": answer, "prompt": prompt})
 
         print("Done!")
