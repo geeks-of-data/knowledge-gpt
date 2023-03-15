@@ -12,24 +12,27 @@ def scrape_youtube(url):
     :return: Pandas DataFrame with the key "caption"
     """
 
-    # Set up youtube-dl options
+    # Set up youtube-dl options    
     ydl_opts = {
+        'skip_download': True,
         'writesubtitles': True,
         'subtitleslangs': ['en'], # Only download English subtitles
+        'outtmpl': '%(id)s.%(ext)s' # Use video ID as output filename
     }
-
+    
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         info = ydl.extract_info(url, download=False)
         video_id = info['id']
         title = info['title']
         filename = f"{video_id}.mp4"
-        
+    
         # Download the video and subtitles
         ydl.download([url])
-        
+
     # Read the subtitles from the file
     with open(f"{video_id}.en.vtt", 'r') as f:
         subtitles = f.read()
+
 
     # Convert the subtitles to plain text and remove timestamps (THIS PART IS NOT WORKING)
     soup = BeautifulSoup(subtitles, 'html.parser')
