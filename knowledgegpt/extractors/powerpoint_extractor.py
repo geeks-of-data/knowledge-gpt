@@ -4,60 +4,62 @@ from ..utils.utils_completion import answer_query_with_context
 from io import BytesIO
 import os
 
+class PowerpointExtractor:
+    def __init__(self, mongo_client, model_lang: str = "en", embedding_extractor: str = "hf", max_tokens: int = 64, to_save: bool = False):
+        self.mongo_client = mongo_client
+        self.model_lang = model_lang
+        self.embedding_extractor = embedding_extractor
+        self.max_tokens = max_tokens
+        self.to_save = to_save
+        self.df = None
+        self.embeddings = None
+        
 
-def powerpoint_scrape(mongo_client, file_path: str,max_tokens, query: str = "", embedding_extractor: str = "hf", model_lang: str = "en", to_save: bool = False):
-    """
-    Function that takes a file path for a Powerpoint presentation as input and returns the response answer.
+    def extract(self, file_path: str, query: str = ""):
+        """
+        Function that takes a file path for a PowerPoint presentation as input and returns the response answer.
 
-    :param file_path: Path to the Powerpoint file
-    :param query: Query to answer
-    :param max_tokens: Maximum number of tokens to use for the prompt
-    :param embedding_extractor: Extractor to use for computing embeddings. Options are "hf" and "openai"
-    :param model_lang: Language of the model to use for computing embeddings. Options are "en" and "tr"
-    :param to_save: Whether to save the embeddings to MongoDB
-    :return: Answer to the query and the prompt and messages
-    
-    """
-    print("Processing Powerpoint file...")
+        :param file_path: Path to the PowerPoint file
+        :param query: Query to answer
+        :return: Answer to the query and the prompt and messages
+        """
+        print("Processing PowerPoint file...")
 
-    if not os.path.isfile(file_path):
-        raise ValueError("Invalid file path provided.")
+        if not os.path.isfile(file_path):
+            raise ValueError("Invalid file path provided.")
 
-    if not file_path.endswith(".pptx"):
-        raise ValueError("Only Powerpoint (.pptx) files are allowed.")
+        if not file_path.endswith(".pptx"):
+            raise ValueError("Only PowerPoint (.pptx) files are allowed.")
 
 
-    pptx_df = None
-    pptx_embeddings = None
+        print("Extracting paragraphs...")
 
-    print("Extracting paragraphs...")
+        with open(file_path, "rb") as f:
+            pptx_buffer = BytesIO(f.read())
 
-    with open(file_path, "rb") as f:
-        pptx_buffer = BytesIO(f.read())
+        self.df = process_pptx(pptx_buffer)
 
-    pptx_df = process_pptx(pptx_buffer)
+        print("Computing embeddings...")
 
-    print("Computing embeddings...")
+        if self.embeddings is None:
+            if self.embedding_extractor == "hf":
+                self.embeddings = compute_doc_embeddings_hf(self.df, self.model_lang)
+            else:
+                self.embeddings = compute_doc_embeddings(self.df)
 
-    if pptx_embeddings is None:
-        if embedding_extractor == "hf":
-            pptx_embeddings = compute_doc_embeddings_hf(pptx_df, model_lang)
+        target = query
+        answer = ""
+
+        print("Answering query...")
+
+        if self.embedding_extractor == "hf":
+            answer, prompt, messages = answer_query_with_context(target, self.df, self.embeddings, embedding_type="hf", model_lang=self.model_lang, max_tokens=self.max_tokens)
         else:
-            pptx_embeddings = compute_doc_embeddings(pptx_df)
+            answer, prompt, messages = answer_query_with_context(target, self.df, self.embeddings, embedding_type="openai", model_lang=self.model_lang, max_tokens=self.max_tokens)
 
-    target = query
-    answer = ""
+        if self.to_save:
+            self.mongo_client.pair_pptx.insert_one({"query": target, "answer": answer, "prompt": prompt})
 
-    print("Answering query...")
+        print("Done!")
 
-    if embedding_extractor == "hf":
-        answer, prompt, messages = answer_query_with_context(target, pptx_df, pptx_embeddings, embedding_type="hf", model_lang=model_lang, max_tokens=max_tokens)
-    else:
-        answer, prompt, messages = answer_query_with_context(target, pptx_df, pptx_embeddings, embedding_type="openai", model_lang=model_lang, max_tokens=max_tokens)
-
-    if to_save:
-        mongo_client.pair_pptx.insert_one({"query": target, "answer": answer, "prompt": prompt})
-
-    print("Done!")
-
-    return answer, prompt, messages
+        return answer, prompt, messages
