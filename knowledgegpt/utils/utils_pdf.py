@@ -4,6 +4,11 @@ import spacy
 nlp = spacy.load('en_core_web_sm')
 
 def process_pdf(pdf_file):
+    """
+    Extracts paragraphs from a PDF file
+    :param pdf_file: PDF file
+    :return: Dataframe with paragraphs
+    """
     pdf_reader = PyPDF2.PdfReader(pdf_file)
 
     num_pages =  len(pdf_reader.pages)

@@ -3,6 +3,12 @@ import pandas as pd
 
 def extract_paragraphs(filename):
 
+    """
+    Extracts paragraphs from a Word file
+    :param filename: Path to the Word file
+    :return: Dataframe with paragraphs
+    """
+
     doc = docx.Document(filename)
     paragraphs = []
     for p in doc.paragraphs:

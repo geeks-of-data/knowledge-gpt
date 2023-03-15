@@ -5,6 +5,12 @@ import pandas as pd
 
 # chat-gpt wrote this, potentially not the best way to do it :D
 def scrape_youtube(url):
+    """
+    Function that takes a YouTube video URL as input and returns the captions
+    as a pandas DataFrame with the key "caption".
+    :param url: YouTube video URL
+    :return: Pandas DataFrame with the key "caption"
+    """
 
     # Set up youtube-dl options
     ydl_opts = {
