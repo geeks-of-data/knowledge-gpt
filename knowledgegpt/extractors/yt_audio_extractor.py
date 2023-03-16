@@ -4,15 +4,18 @@ from ..utils.utils_embedding import compute_doc_embeddings, compute_doc_embeddin
 from ..utils.utils_completion import answer_query_with_context
 
 class YoutubeAudioExtractor:
-    def __init__(self, video_id: str, embedding_extractor='hf', model_lang='en'):
+    def __init__(self, video_id: str, embedding_extractor='hf', model_lang='en', is_turbo: bool = False):
         self.video_id = video_id
         self.model_lang = model_lang
         self.embedding_extractor = embedding_extractor
+        self.is_turbo = is_turbo
 
         self.max_tokens = 1000
         self.mongo_client = None
         self.df = None
         self.embeddings = None
+        self.messages = []
+        self.is_first_time = True
 
     def extract(self, query: str, max_tokens, to_save: Optional[bool] = False, mongo_client=None):
         """
@@ -30,8 +33,9 @@ class YoutubeAudioExtractor:
         if max_tokens is not None:
             self.max_tokens = max_tokens
 
-        if not self.video_id:
-            raise ValueError("Video ID is missing")
+        if self.is_first_time:
+            if not self.video_id:
+                raise ValueError("Video ID is missing")
 
         print("Extracting text...")
 
@@ -48,10 +52,20 @@ class YoutubeAudioExtractor:
 
         print("Answering query...")
 
+        if len(self.messages) == 0 and self.is_turbo == True:
+            self.messages = [{"role": "system", "content": "you are a helpful assistant"}]
+
+        if len(self.messages) > 2:
+            self.is_first_time = False
+            print("not the first time")
+
+        target = query
+        answer = ""
+
         if self.embedding_extractor == "hf":
-            answer, prompt, messages = answer_query_with_context(query, self.df, self.embeddings, embedding_type="hf", model_lang=self.model_lang, max_tokens=max_tokens)
+            answer, prompt, self.messages = answer_query_with_context(target, self.df, self.embeddings, embedding_type="hf", model_lang=self.model_lang, is_turbo=self.is_turbo, messages=self.messages, is_first_time=self.is_first_time, max_tokens=max_tokens)
         else:
-            answer, prompt, messages = answer_query_with_context(query, self.df, self.embeddings, embedding_type="openai", model_lang=self.model_lang, max_tokens=max_tokens)
+            answer, prompt, self.messages = answer_query_with_context(target, self.df, self.embeddings, embedding_type="openai", model_lang=self.model_lang, is_turbo=self.is_turbo, messages=self.messages, is_first_time=self.is_first_time, max_tokens=max_tokens)
 
         if to_save:
             print("Saving to Mongo...")
@@ -60,4 +74,4 @@ class YoutubeAudioExtractor:
 
         print("Done!")
 
-        return answer, prompt, messages
+        return answer, prompt, self.messages

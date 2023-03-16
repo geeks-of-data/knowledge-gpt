@@ -6,7 +6,7 @@ from ..utils.utils_completion import answer_query_with_context
 
 
 class WebScrapeExtractor:
-    def __init__(self, url, embedding_extractor: str, model_lang: str):
+    def __init__(self, url, embedding_extractor: str, model_lang: str, is_turbo: bool = False):
         self.url = url
         self.embedding_extractor = embedding_extractor
         self.model_lang = model_lang
@@ -14,6 +14,9 @@ class WebScrapeExtractor:
         self.mongo_client = None
         self.df = None
         self.embeddings = None
+        self.is_turbo = is_turbo
+        self.messages = []
+        self.is_first_time = True
 
     def extract(self,  query: Optional[str] = None, max_tokens: int=1000, to_save: bool = False, mongo_client=None):
         """
@@ -28,13 +31,18 @@ class WebScrapeExtractor:
 
         """
         print("Scraping website...")
-        if not self.url:
-            raise ValueError("url is missing")
 
-        if max_tokens is not None:
-            self.max_tokens = max_tokens
+        if self.is_first_time:
 
-        self.df = scrape_content(self.url)
+            if not self.url:
+                raise ValueError("url is missing")
+
+            if max_tokens is not None:
+                self.max_tokens = max_tokens
+
+        if self.df is None:
+
+            self.df = scrape_content(self.url)
 
         print("Computing embeddings...")
 
@@ -44,19 +52,22 @@ class WebScrapeExtractor:
             else:
                 self.embeddings = compute_doc_embeddings(self.df)
 
+        if len(self.messages) == 0 and self.is_turbo == True:
+            self.messages = [{"role": "system", "content": "you are a helpful assistant"}]
+
+        if len(self.messages) > 2:
+            self.is_first_time = False
+            print("not the first time")
+
         target = query
         answer = ""
 
         print("Answering query...")
 
         if self.embedding_extractor == "hf":
-            answer, prompt, messages = answer_query_with_context(target, self.df, self.embeddings,
-                                                                  embedding_type="hf", model_lang=self.model_lang,
-                                                                  max_tokens=self.max_tokens)
+            answer, prompt, self.messages = answer_query_with_context(target, self.df, self.embeddings, embedding_type="hf", model_lang=self.model_lang, is_turbo=self.is_turbo, messages=self.messages, is_first_time=self.is_first_time, max_tokens=max_tokens)
         else:
-            answer, prompt, messages = answer_query_with_context(target, self.df, self.embeddings,
-                                                                  embedding_type="openai", model_lang=self.model_lang,
-                                                                  max_tokens=self.max_tokens)
+            answer, prompt, self.messages = answer_query_with_context(target, self.df, self.embeddings, embedding_type="openai", model_lang=self.model_lang, is_turbo=self.is_turbo, messages=self.messages, is_first_time=self.is_first_time, max_tokens=max_tokens)
 
         if to_save:
             print("Saving to Mongo...")
@@ -65,4 +76,4 @@ class WebScrapeExtractor:
 
         print("Done!")
 
-        return answer, prompt, messages
+        return answer, prompt, self.messages
