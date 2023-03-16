@@ -24,7 +24,7 @@ def answer_query_with_context(
     show_prompt: bool = True,
     embedding_type: str = "hf",
     model_lang: str = "en",
-    is_turbo: str = "false",
+    is_turbo: str = False,
     messages: list = None,
     is_first_time: bool = True,
     max_tokens = 1000
@@ -50,7 +50,7 @@ def answer_query_with_context(
     COMPLETIONS_API_PARAMS_TURBO["max_tokens"] = max_tokens
 
     
-    if is_first_time==True:
+    if is_first_time==True or is_turbo==False:
 
         prompt = construct_prompt(
         query,
@@ -60,19 +60,19 @@ def answer_query_with_context(
         model_lang=model_lang,
         max_tokens=max_tokens
     )
-        if is_turbo=="true":
+        if is_turbo==True:
             messages.append({"role": "user", "content": prompt})
         
     else:
         prompt = query
-        if is_turbo=="true":
+        if is_turbo==True:
             messages.append({"role": "user", "content": prompt})
     
     if show_prompt:
         print(prompt)
 
         
-    if is_turbo!="true":
+    if is_turbo ==False:
         response = openai.Completion.create(
                 prompt=prompt,
                 **COMPLETIONS_API_PARAMS
@@ -84,7 +84,7 @@ def answer_query_with_context(
             )
         
 
-    if is_turbo=="true":
+    if is_turbo==True:
         messages.append({"role": "assistant", "content": response["choices"][0]["message"]["content"].strip(" \n")})
         return response["choices"][0]["message"]["content"].strip(" \n"), prompt, messages
     else:

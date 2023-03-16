@@ -4,7 +4,7 @@ from ..utils.utils_completion import answer_query_with_context
 
 
 class YTSubsExtractor:
-    def __init__(self,  video_id: str, model_lang="en", embedding_extractor="hf"):
+    def __init__(self,  video_id: str, model_lang="en", embedding_extractor="hf", is_turbo: bool = False):
         self.video_id= video_id
         self.model_lang = model_lang
         self.embedding_extractor = embedding_extractor
@@ -12,6 +12,9 @@ class YTSubsExtractor:
         self.mongo_client = None
         self.df = None
         self.embeddings = None
+        self.is_turbo = is_turbo
+        self.messages = []
+        self.is_first_time = True
 
     def extract(self, query: str, max_tokens=1000, to_save: bool=None, mongo_client=None):
         """
@@ -28,8 +31,10 @@ class YTSubsExtractor:
         if max_tokens is not None:
             self.max_tokens = max_tokens
 
-        if not self.video_id:
-            raise ValueError("Video ID is missing")
+        if self.is_first_time == True:
+            if not self.video_id:
+                raise ValueError("Video ID is missing")
+        
         if self.df is None:
             self.df = scrape_youtube(self.video_id)
 
@@ -43,11 +48,15 @@ class YTSubsExtractor:
 
             print("Answering query...")
 
+        target = query
         answer = ""
+
+        print("Answering query...")
+
         if self.embedding_extractor == "hf":
-            answer, prompt, messages = answer_query_with_context(query, self.df, self.embeddings, embedding_type="hf", model_lang=self.model_lang, max_tokens=max_tokens)
+            answer, prompt, self.messages = answer_query_with_context(target, self.df, self.embeddings, embedding_type="hf", model_lang=self.model_lang, is_turbo=self.is_turbo, messages=self.messages, is_first_time=self.is_first_time, max_tokens=max_tokens)
         else:
-            answer, prompt, messages = answer_query_with_context(query, self.df, self.embeddings, embedding_type="openai", model_lang=self.model_lang, max_tokens=max_tokens)
+            answer, prompt, self.messages = answer_query_with_context(target, self.df, self.embeddings, embedding_type="openai", model_lang=self.model_lang, is_turbo=self.is_turbo, messages=self.messages, is_first_time=self.is_first_time, max_tokens=max_tokens)
 
         if to_save:
             print("Saving to Mongo...")
@@ -56,5 +65,5 @@ class YTSubsExtractor:
 
         print("Done!")
 
-        return answer, prompt, messages
+        return answer, prompt, self.messages
 

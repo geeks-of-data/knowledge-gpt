@@ -15,6 +15,7 @@ class DocsExtractor:
         self.df = None
         self.embeddings = None
         self.messages = []
+        self.is_first_time = True
         
     def extract(self, query: str, max_tokens, to_save: bool = False,mongo_client=None) -> dict:
         """
@@ -30,20 +31,24 @@ class DocsExtractor:
         """
         print("Processing Word file...")
 
-        if not os.path.isfile(self.file_path):
-            return {"error": "File not found"}
+        if self.is_first_time == False:
 
-        _, ext = os.path.splitext(self.file_path)
-        allowed_ext = [".doc", ".docx"]
-        if ext not in allowed_ext:
-            return {"error": "Only Word files are allowed"}
+            if not os.path.isfile(self.file_path):
+                return {"error": "File not found"}
+
+            _, ext = os.path.splitext(self.file_path)
+            allowed_ext = [".doc", ".docx"]
+            if ext not in allowed_ext:
+                return {"error": "Only Word files are allowed"}
 
         print("Extracting paragraphs...")
 
-        with open(self.file_path, "rb") as f:
-            docs_buffer = BytesIO(f.read())
+        if self.df is None:
 
-        self.df = extract_paragraphs(docs_buffer)
+            with open(self.file_path, "rb") as f:
+                docs_buffer = BytesIO(f.read())
+
+            self.df = extract_paragraphs(docs_buffer)
 
         print("Computing embeddings...")
 
@@ -61,15 +66,14 @@ class DocsExtractor:
         if len(self.messages) == 0 and self.is_turbo == True:
             self.messages = [{"role": "system", "content": "you are a helpful assistant"}]
 
-        is_first_time = True
         if len(self.messages) > 2:
-            is_first_time = False
-            print("not first time")
+            self.is_first_time = False
+            print("not the first time")
 
         if self.embedding_extractor == "hf":
-            answer, prompt, self.messages = answer_query_with_context(target, self.df, self.embeddings, embedding_type="hf", model_lang=self.model_lang, is_turbo=self.is_turbo, messages=self.messages, is_first_time=is_first_time, max_tokens=max_tokens)
+            answer, prompt, self.messages = answer_query_with_context(target, self.df, self.embeddings, embedding_type="hf", model_lang=self.model_lang, is_turbo=self.is_turbo, messages=self.messages, is_first_time=self.is_first_time, max_tokens=max_tokens)
         else:
-            answer, prompt, self.messages = answer_query_with_context(target, self.df, self.embeddings, embedding_type="openai", model_lang=self.model_lang, is_turbo=self.is_turbo, messages=self.messages, is_first_time=is_first_time, max_tokens=max_tokens)
+            answer, prompt, self.messages = answer_query_with_context(target, self.df, self.embeddings, embedding_type="openai", model_lang=self.model_lang, is_turbo=self.is_turbo, messages=self.messages, is_first_time=self.is_first_time, max_tokens=max_tokens)
 
         if to_save == True:
             print("Saving to Mongo...")

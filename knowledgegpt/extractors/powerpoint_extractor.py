@@ -5,7 +5,7 @@ from io import BytesIO
 import os
 
 class PowerpointExtractor:
-    def __init__(self, file_path,   embedding_extractor: str = "hf", model_lang: str = "en"):
+    def __init__(self, file_path,   embedding_extractor: str = "hf", model_lang: str = "en", is_turbo: bool = False ):
         self.file_path = file_path
         self.model_lang = model_lang
         self.embedding_extractor = embedding_extractor
@@ -14,6 +14,9 @@ class PowerpointExtractor:
         self.mongo_client = None
         self.df = None
         self.embeddings = None
+        self.is_first_time = True
+        self.messages = []
+        self.is_turbo = is_turbo
         
 
     def extract(self,   query: str = "",max_tokens: int = 1000,to_save: bool = False, mongo_client = None):
@@ -29,19 +32,23 @@ class PowerpointExtractor:
         if max_tokens is not None:
             self.max_tokens = max_tokens
 
-        if not os.path.isfile(self.file_path):
-            raise ValueError("Invalid file path provided.")
+        if self.is_first_time:
 
-        if not self.file_path.endswith(".pptx"):
-            raise ValueError("Only PowerPoint (.pptx) files are allowed.")
+            if not os.path.isfile(self.file_path):
+                raise ValueError("Invalid file path provided.")
+
+            if not self.file_path.endswith(".pptx"):
+                raise ValueError("Only PowerPoint (.pptx) files are allowed.")
 
 
         print("Extracting paragraphs...")
 
-        with open(self.file_path, "rb") as f:
-            pptx_buffer = BytesIO(f.read())
+        if self.df is None:
 
-        self.df = process_pptx(pptx_buffer)
+            with open(self.file_path, "rb") as f:
+                pptx_buffer = BytesIO(f.read())
+
+            self.df = process_pptx(pptx_buffer)
 
         print("Computing embeddings...")
 
@@ -51,15 +58,25 @@ class PowerpointExtractor:
             else:
                 self.embeddings = compute_doc_embeddings(self.df)
 
-        target = query
-        answer = ""
+
 
         print("Answering query...")
 
+        if len(self.messages) == 0 and self.is_turbo == True:
+            self.messages = [{"role": "system", "content": "you are a helpful assistant"}]
+
+        if len(self.messages) > 2:
+            self.is_first_time = False
+            print("not the first time")
+
+        target = query
+        answer = ""
+
         if self.embedding_extractor == "hf":
-            answer, prompt, messages = answer_query_with_context(target, self.df, self.embeddings, embedding_type="hf", model_lang=self.model_lang, max_tokens=self.max_tokens)
+            answer, prompt, self.messages = answer_query_with_context(target, self.df, self.embeddings, embedding_type="hf", model_lang=self.model_lang, is_turbo=self.is_turbo, messages=self.messages, is_first_time=self.is_first_time, max_tokens=max_tokens)
         else:
-            answer, prompt, messages = answer_query_with_context(target, self.df, self.embeddings, embedding_type="openai", model_lang=self.model_lang, max_tokens=self.max_tokens)
+            answer, prompt, self.messages = answer_query_with_context(target, self.df, self.embeddings, embedding_type="openai", model_lang=self.model_lang, is_turbo=self.is_turbo, messages=self.messages, is_first_time=self.is_first_time, max_tokens=max_tokens)
+
 
         if to_save:
             print("Saving to MongoDB...")
@@ -68,4 +85,4 @@ class PowerpointExtractor:
 
         print("Done!")
 
-        return answer, prompt, messages
+        return answer, prompt, self.messages
