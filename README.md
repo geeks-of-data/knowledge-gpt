@@ -1,6 +1,11 @@
 <!-- Use the context of other files to complete here -->
 ![knowledgegpt](./public/logo.png)
 
+
+# Pip URL
+
+`https://pypi.org/project/knowledgegpt/`
+
 # knowledgegpt
 
 ***knowledgegpt*** is designed to gather information from various sources, including the internet and local data, which
