@@ -1,7 +1,7 @@
-from .helpers import check_embedding_extractor
-from ..utils.utils_pdf import process_pdf, process_pdf_page
-from ..utils.utils_embedding import compute_doc_embeddings, compute_doc_embeddings_hf
-from ..utils.utils_completion import answer_query_with_context
+from knowledgegpt_base.extractors.helpers import check_embedding_extractor
+from knowledgegpt_base.utils.utils_pdf import process_pdf, process_pdf_page
+from knowledgegpt_base.utils.utils_embedding import compute_doc_embeddings, compute_doc_embeddings_hf
+from knowledgegpt_base.utils.utils_completion import answer_query_with_context
 from io import BytesIO
 from typing import Optional, Tuple, List
 

@@ -2,7 +2,7 @@ import os
 
 from io import BytesIO
 
-from extractors.helpers import check_embedding_extractor
+from knowledgegpt_base.extractors.helpers import check_embedding_extractor
 from knowledgegpt_base.utils.utils_docs import extract_paragraphs
 from knowledgegpt_base.utils.utils_embedding import compute_doc_embeddings, compute_doc_embeddings_hf
 from knowledgegpt_base.utils.utils_completion import answer_query_with_context
