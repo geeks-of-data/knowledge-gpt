@@ -1,3 +1,4 @@
+from extractors.helpers import check_embedding_extractor
 from knowledgegpt_base.utils.utils_embedding import compute_doc_embeddings, compute_doc_embeddings_hf
 from knowledgegpt_base.utils.utils_completion import answer_query_with_context
 
@@ -5,6 +6,9 @@ from knowledgegpt_base.utils.utils_completion import answer_query_with_context
 class BasicExtractor:
     def __init__(self, dataframe, embedding_extractor="hf", model_lang="en", is_turbo=False, index_type="basic"):
         self.df = dataframe
+        check_embedding_extractor(
+                embedding_extractor=embedding_extractor
+        )
         self.embedding_extractor = embedding_extractor
         self.model_lang = model_lang
         self.is_turbo = is_turbo
@@ -17,11 +21,6 @@ class BasicExtractor:
         self.embeddings = None
         self.answer = ""
         self.prompt = ""
-        self.embedding_extractor_acceptable_list = ["hf", "openai"]
-
-        if self.embedding_extractor not in self.embedding_extractor_acceptable_list:
-            raise Exception(f"Embedding Extractor is not allowed. "
-                            f"Please choose one of : {self.embedding_extractor_acceptable_list}")
 
     def extract(self, query, max_tokens, to_save=False, mongo_client=None):
 

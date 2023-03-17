@@ -1,14 +1,18 @@
+from .helpers import check_embedding_extractor
 from ..utils.utils_subtitles import scrape_youtube
 from ..utils.utils_embedding import compute_doc_embeddings, compute_doc_embeddings_hf
 from ..utils.utils_completion import answer_query_with_context
 
 
 class YTSubsExtractor:
-    def __init__(self,  video_id: str, model_lang="en", embedding_extractor="hf", is_turbo: bool = False):
-        self.video_id= video_id
+    def __init__(self, video_id: str, model_lang="en", embedding_extractor="hf", is_turbo: bool = False):
+        check_embedding_extractor(
+            embedding_extractor=embedding_extractor
+        )
+        self.video_id = video_id
         self.model_lang = model_lang
         self.embedding_extractor = embedding_extractor
-        self.max_tokens=1000
+        self.max_tokens = 1000
         self.mongo_client = None
         self.df = None
         self.embeddings = None
@@ -16,7 +20,7 @@ class YTSubsExtractor:
         self.messages = []
         self.is_first_time = True
 
-    def extract(self, query: str, max_tokens=1000, to_save: bool=None, mongo_client=None):
+    def extract(self, query: str, max_tokens=1000, to_save: bool = None, mongo_client=None):
         """
         Method that takes a YouTube video ID as input and returns the captions
         as a pandas DataFrame with the key "caption".
@@ -34,7 +38,7 @@ class YTSubsExtractor:
         if self.is_first_time == True:
             if not self.video_id:
                 raise ValueError("Video ID is missing")
-        
+
         if self.df is None:
             self.df = scrape_youtube(self.video_id)
 
@@ -54,9 +58,18 @@ class YTSubsExtractor:
         print("Answering query...")
 
         if self.embedding_extractor == "hf":
-            answer, prompt, self.messages = answer_query_with_context(target, self.df, self.embeddings, embedding_type="hf", model_lang=self.model_lang, is_turbo=self.is_turbo, messages=self.messages, is_first_time=self.is_first_time, max_tokens=max_tokens)
+            answer, prompt, self.messages = answer_query_with_context(target, self.df, self.embeddings,
+                                                                      embedding_type="hf", model_lang=self.model_lang,
+                                                                      is_turbo=self.is_turbo, messages=self.messages,
+                                                                      is_first_time=self.is_first_time,
+                                                                      max_tokens=max_tokens)
         else:
-            answer, prompt, self.messages = answer_query_with_context(target, self.df, self.embeddings, embedding_type="openai", model_lang=self.model_lang, is_turbo=self.is_turbo, messages=self.messages, is_first_time=self.is_first_time, max_tokens=max_tokens)
+            answer, prompt, self.messages = answer_query_with_context(target, self.df, self.embeddings,
+                                                                      embedding_type="openai",
+                                                                      model_lang=self.model_lang,
+                                                                      is_turbo=self.is_turbo, messages=self.messages,
+                                                                      is_first_time=self.is_first_time,
+                                                                      max_tokens=max_tokens)
 
         if to_save:
             print("Saving to Mongo...")
@@ -66,4 +79,3 @@ class YTSubsExtractor:
         print("Done!")
 
         return answer, prompt, self.messages
-

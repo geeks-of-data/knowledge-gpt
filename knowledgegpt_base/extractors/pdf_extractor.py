@@ -1,11 +1,14 @@
+from .helpers import check_embedding_extractor
 from ..utils.utils_pdf import process_pdf, process_pdf_page
 from ..utils.utils_embedding import compute_doc_embeddings, compute_doc_embeddings_hf
 from ..utils.utils_completion import answer_query_with_context
 from io import BytesIO
 from typing import Optional, Tuple, List
 
+
 class PDFExtractor:
-    def __init__(self, pdf_file_path: str, extraction_type: str = "page", embedding_extractor: str = "hf", model_lang: str = "en",is_turbo: bool = False):
+    def __init__(self, pdf_file_path: str, extraction_type: str = "page", embedding_extractor: str = "hf",
+                 model_lang: str = "en", is_turbo: bool = False):
         """
         Extracts paragraphs from a PDF file and computes embeddings for each paragraph, then answers a query using the embeddings.
         :param extraction_type: Type of extraction to use. Options are "page" and "paragraph"
@@ -15,10 +18,13 @@ class PDFExtractor:
         :param max_tokens: Maximum number of tokens to use for the answer
         :param mongo_client: MongoDB client
         """
+        check_embedding_extractor(
+            embedding_extractor=embedding_extractor
+        )
         self.mongo_client = None
         self.max_tokens = 1000
         self.is_turbo = is_turbo
-        self.pdf_file_path =pdf_file_path
+        self.pdf_file_path = pdf_file_path
         self.extraction_type = extraction_type
         self.embedding_extractor = embedding_extractor
         self.model_lang = model_lang
@@ -26,8 +32,9 @@ class PDFExtractor:
         self.embeddings = None
         self.messages = []
         self.is_first_time = True
-    
-    def extract(self, query: str,max_tokens=None, to_save=False,  mongo_client=None ) -> Tuple[str, Optional[str], List[str]]:
+
+    def extract(self, query: str, max_tokens=None, to_save=False, mongo_client=None) -> Tuple[
+        str, Optional[str], List[str]]:
         """
         Extracts paragraphs from a PDF file and computes embeddings for each paragraph, then answers a query using the embeddings.
         :param query: Query to answer
@@ -75,9 +82,18 @@ class PDFExtractor:
         target = query
         answer = ""
         if self.embedding_extractor == "hf":
-            answer, prompt, self.messages = answer_query_with_context(target, self.df, self.embeddings, embedding_type="hf", model_lang=self.model_lang, is_turbo=self.is_turbo, messages=self.messages, is_first_time=self.is_first_time, max_tokens=max_tokens)
+            answer, prompt, self.messages = answer_query_with_context(target, self.df, self.embeddings,
+                                                                      embedding_type="hf", model_lang=self.model_lang,
+                                                                      is_turbo=self.is_turbo, messages=self.messages,
+                                                                      is_first_time=self.is_first_time,
+                                                                      max_tokens=max_tokens)
         else:
-            answer, prompt, self.messages = answer_query_with_context(target, self.df, self.embeddings, embedding_type="openai", model_lang=self.model_lang, is_turbo=self.is_turbo, messages=self.messages, is_first_time=self.is_first_time, max_tokens=max_tokens)
+            answer, prompt, self.messages = answer_query_with_context(target, self.df, self.embeddings,
+                                                                      embedding_type="openai",
+                                                                      model_lang=self.model_lang,
+                                                                      is_turbo=self.is_turbo, messages=self.messages,
+                                                                      is_first_time=self.is_first_time,
+                                                                      max_tokens=max_tokens)
 
         if to_save:
             print("Saving to MongoDB...")
