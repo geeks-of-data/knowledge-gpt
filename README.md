@@ -15,7 +15,7 @@
 ## To run mongo locally
 
 - docker pull mongo:latest
-- sh sh/docker_mongo_local_run.sh
+- `sh sh/docker_mongo_local_run.sh`
 - docker ps
 
 # knowledgegpt_base
@@ -63,7 +63,7 @@ from knowledgegpt_base.extractors.web_scrape_extractor import WebScrapeExtractor
 
 # Import OpenAI and Set the API Key
 import openai
-from config import SECRET_KEY
+from example_config import SECRET_KEY 
 openai.api_key = SECRET_KEY
 
 
