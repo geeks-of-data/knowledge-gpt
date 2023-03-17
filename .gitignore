@@ -21,3 +21,4 @@ dist
 *.part
 *.ytdl
 *test.ipynb
+examples/local_example_config.py
