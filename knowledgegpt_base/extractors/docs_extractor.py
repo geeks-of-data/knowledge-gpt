@@ -71,15 +71,11 @@ class DocsExtractor:
             self.is_first_time = False
             print("not the first time")
 
-        if self.embedding_extractor == "hf":
-            embedding_type = "hf"
-        else:
-            embedding_type = "openai"
         self.answer, self.prompt, self.messages = answer_query_with_context(
             query=query,
             df=self.df,
             document_embeddings=self.embeddings,
-            embedding_type=embedding_type,
+            embedding_type=self.embedding_extractor,
             model_lang=self.model_lang,
             is_turbo=self.is_turbo,
             messages=self.messages,
@@ -100,6 +96,6 @@ class DocsExtractor:
             else:
                 self.mongo_client.pairs_docs_turbo.insert_one({"conversation": self.messages})
 
-        print("Done!")
+        print("AllDone!")
 
         return self.answer, self.prompt, self.messages

@@ -14,9 +14,6 @@ class PDFExtractor:
         :param extraction_type: Type of extraction to use. Options are "page" and "paragraph"
         :param embedding_extractor: Extractor to use for computing embeddings. Options are "hf" and "openai"
         :param model_lang: Language of the model to use for computing embeddings. Options are "en" and "tr"
-        :param to_save: Whether to save the embeddings to MongoDB
-        :param max_tokens: Maximum number of tokens to use for the answer
-        :param mongo_client: MongoDB client
         """
         check_embedding_extractor(
             embedding_extractor=embedding_extractor
@@ -32,6 +29,8 @@ class PDFExtractor:
         self.embeddings = None
         self.messages = []
         self.is_first_time = True
+        self.answer = ""
+        self.prompt = ""
 
     def extract(self, query: str, max_tokens=None, to_save=False, mongo_client=None) -> Tuple[
         str, Optional[str], List[str]]:
@@ -79,27 +78,23 @@ class PDFExtractor:
             self.is_first_time = False
             print("not the first time")
 
-        target = query
-        answer = ""
-        if self.embedding_extractor == "hf":
-            answer, prompt, self.messages = answer_query_with_context(target, self.df, self.embeddings,
-                                                                      embedding_type="hf", model_lang=self.model_lang,
-                                                                      is_turbo=self.is_turbo, messages=self.messages,
-                                                                      is_first_time=self.is_first_time,
-                                                                      max_tokens=max_tokens)
-        else:
-            answer, prompt, self.messages = answer_query_with_context(target, self.df, self.embeddings,
-                                                                      embedding_type="openai",
-                                                                      model_lang=self.model_lang,
-                                                                      is_turbo=self.is_turbo, messages=self.messages,
-                                                                      is_first_time=self.is_first_time,
-                                                                      max_tokens=max_tokens)
+        self.answer, self.prompt, self.messages = answer_query_with_context(
+            query=query,
+            df=self.df,
+            document_embeddings=self.embeddings,
+            embedding_type=self.embedding_extractor,
+            model_lang=self.model_lang,
+            is_turbo=self.is_turbo,
+            messages=self.messages,
+            is_first_time=self.is_first_time,
+            max_tokens=max_tokens
+        )
 
         if to_save:
             print("Saving to MongoDB...")
             self.mongo_client = mongo_client
-            self.mongo_client.pair_pdf.insert_one({"query": target, "answer": answer, "prompt": prompt})
+            self.mongo_client.pair_pdf.insert_one({"query": query, "answer": self.answer, "prompt": self.prompt})
 
-        print("Done!")
+        print("AllDone!")
 
-        return answer, prompt, self.messages
+        return self.answer, self.prompt, self.messages
