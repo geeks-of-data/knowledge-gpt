@@ -1,17 +1,17 @@
 from fastapi import FastAPI, File, UploadFile, Form, HTTPException
 from io import BytesIO
-from knowledgegpt.utils.utils_pdf import process_pdf, process_pdf_page
-from knowledgegpt.utils.utils_embedding import compute_doc_embeddings_hf,  compute_doc_embeddings
-from knowledgegpt.utils.utils_completion import answer_query_with_context
-from knowledgegpt.utils.utils_scrape import scrape_content
-from knowledgegpt.utils.utils_subtitles import scrape_youtube
-from knowledgegpt.utils.utils_powerpoint import process_pptx
-from knowledgegpt.utils.utils_yt_whisper import transcribe_youtube_audio
-from knowledgegpt.utils.utils_docs import extract_paragraphs
+from knowledgegpt_base.utils.utils_pdf import process_pdf, process_pdf_page
+from knowledgegpt_base.utils.utils_embedding import compute_doc_embeddings_hf,  compute_doc_embeddings
+from knowledgegpt_base.utils.utils_completion import answer_query_with_context
+from knowledgegpt_base.utils.utils_scrape import scrape_content
+from knowledgegpt_base.utils.utils_subtitles import scrape_youtube
+from knowledgegpt_base.utils.utils_powerpoint import process_pptx
+from knowledgegpt_base.utils.utils_yt_whisper import transcribe_youtube_audio
+from knowledgegpt_base.utils.utils_docs import extract_paragraphs
 from typing import Optional
-from knowledgegpt.models.search import SearchQuery
-from knowledgegpt.models.scrape import ScrapeQuery
-from knowledgegpt.models.yt_subs import YTSubsQuery
+from knowledgegpt_base.models.search import SearchQuery
+from knowledgegpt_base.models.scrape import ScrapeQuery
+from knowledgegpt_base.models.yt_subs import YTSubsQuery
 from fastapi import HTTPException
 from knowledgebase.config import MONGO_URI
 from pymongo import MongoClient

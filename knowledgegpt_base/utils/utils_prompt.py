@@ -1,5 +1,5 @@
 # https://github.com/openai/openai-cookbook/blob/main/examples/Question_answering_using_embeddings.ipynb sourced from here
-from knowledgegpt.utils.utils_distance import order_document_sections_by_query_similarity
+from knowledgegpt_base.utils.utils_distance import order_document_sections_by_query_similarity
 import pandas as pd
 
 import tiktoken

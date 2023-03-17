@@ -12,7 +12,7 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/geeks-of-data/knowled-gpt",
-    packages=["knowledgegpt", "knowledgegpt.extractors", "knowledgegpt.utils"],
+    packages=["knowledgegpt_base", "knowledgegpt_base.extractors", "knowledgegpt_base.utils"],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
