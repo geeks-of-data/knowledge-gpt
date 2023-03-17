@@ -21,6 +21,8 @@ class WebScrapeExtractor:
         self.is_turbo = is_turbo
         self.messages = []
         self.is_first_time = True
+        self.answer = ""
+        self.prompt = ""
 
     def extract(self, query: Optional[str] = None, max_tokens: int = 1000, to_save: bool = False, mongo_client=None):
         """
@@ -62,30 +64,25 @@ class WebScrapeExtractor:
             self.is_first_time = False
             print("not the first time")
 
-        target = query
-        answer = ""
-
         print("Answering query...")
 
-        if self.embedding_extractor == "hf":
-            answer, prompt, self.messages = answer_query_with_context(target, self.df, self.embeddings,
-                                                                      embedding_type="hf", model_lang=self.model_lang,
-                                                                      is_turbo=self.is_turbo, messages=self.messages,
-                                                                      is_first_time=self.is_first_time,
-                                                                      max_tokens=max_tokens)
-        else:
-            answer, prompt, self.messages = answer_query_with_context(target, self.df, self.embeddings,
-                                                                      embedding_type="openai",
-                                                                      model_lang=self.model_lang,
-                                                                      is_turbo=self.is_turbo, messages=self.messages,
-                                                                      is_first_time=self.is_first_time,
-                                                                      max_tokens=max_tokens)
+        self.answer, self.prompt, self.messages = answer_query_with_context(
+            query=query,
+            df=self.df,
+            document_embeddings=self.embeddings,
+            embedding_type=self.embedding_extractor,
+            model_lang=self.model_lang,
+            is_turbo=self.is_turbo,
+            messages=self.messages,
+            is_first_time=self.is_first_time,
+            max_tokens=max_tokens
+        )
 
         if to_save:
             print("Saving to Mongo...")
             self.mongo_client = mongo_client
-            self.mongo_client.pair_web.insert_one({"query": target, "answer": answer, "prompt": prompt})
+            self.mongo_client.pair_web.insert_one({"query": query, "answer": self.answer, "prompt": self.prompt})
 
         print("Done!")
 
-        return answer, prompt, self.messages
+        return self.answer, self.prompt, self.messages
