@@ -1,4 +1,4 @@
-from extractors.helpers import check_embedding_extractor
+from knowledgegpt_base.extractors.helpers import check_embedding_extractor
 from knowledgegpt_base.utils.utils_embedding import compute_doc_embeddings, compute_doc_embeddings_hf
 from knowledgegpt_base.utils.utils_completion import answer_query_with_context
 
@@ -7,7 +7,7 @@ class BasicExtractor:
     def __init__(self, dataframe, embedding_extractor="hf", model_lang="en", is_turbo=False, index_type="basic"):
         self.df = dataframe
         check_embedding_extractor(
-                embedding_extractor=embedding_extractor
+            embedding_extractor=embedding_extractor
         )
         self.embedding_extractor = embedding_extractor
         self.model_lang = model_lang
@@ -37,15 +37,11 @@ class BasicExtractor:
 
         print("Answering query...")
 
-        if self.embedding_extractor == "hf":
-            embedding_type = "hf"
-        else:
-            embedding_type = "openai"
         self.answer, self.prompt, self.messages = answer_query_with_context(
             query=query,
             df=self.df,
             document_embeddings=self.embeddings,
-            embedding_type=embedding_type,
+            embedding_type=self.embedding_extractor,
             model_lang=self.model_lang,
             is_turbo=self.is_turbo,
             messages=self.messages,

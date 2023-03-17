@@ -2,7 +2,7 @@ import os
 
 from io import BytesIO
 
-from extractors.helpers import check_embedding_extractor
+from knowledgegpt_base.extractors.helpers import check_embedding_extractor
 from knowledgegpt_base.utils.utils_docs import extract_paragraphs
 from knowledgegpt_base.utils.utils_embedding import compute_doc_embeddings, compute_doc_embeddings_hf
 from knowledgegpt_base.utils.utils_completion import answer_query_with_context
@@ -62,8 +62,6 @@ class DocsExtractor:
             else:
                 self.embeddings = compute_doc_embeddings(self.df)
 
-        target = query
-
         print("Answering query...")
 
         if len(self.messages) == 0 and self.is_turbo == True:
@@ -73,30 +71,17 @@ class DocsExtractor:
             self.is_first_time = False
             print("not the first time")
 
-        if self.embedding_extractor == "hf":
-            self.answer, self.prompt, self.messages = answer_query_with_context(
-                query=target,
-                df=self.df,
-                document_embeddings=self.embeddings,
-                embedding_type="hf",
-                model_lang=self.model_lang,
-                is_turbo=self.is_turbo,
-                messages=self.messages,
-                is_first_time=self.is_first_time,
-                max_tokens=max_tokens
-            )
-        else:
-            self.answer, self.prompt, self.messages = answer_query_with_context(
-                query=target,
-                df=self.df,
-                document_embeddings=self.embeddings,
-                embedding_type="openai",
-                model_lang=self.model_lang,
-                is_turbo=self.is_turbo,
-                messages=self.messages,
-                is_first_time=self.is_first_time,
-                max_tokens=max_tokens
-            )
+        self.answer, self.prompt, self.messages = answer_query_with_context(
+            query=query,
+            df=self.df,
+            document_embeddings=self.embeddings,
+            embedding_type=self.embedding_extractor,
+            model_lang=self.model_lang,
+            is_turbo=self.is_turbo,
+            messages=self.messages,
+            is_first_time=self.is_first_time,
+            max_tokens=max_tokens
+        )
 
         if to_save:
             # if to_save true then insert into mongo else do not required mongo client or pymongo etc.
@@ -104,13 +89,13 @@ class DocsExtractor:
             self.mongo_client = mongo_client
             if not self.is_turbo:
                 self.mongo_client.pairs_docs.insert_one({
-                    "query": target,
+                    "query": query,
                     "answer": self.answer,
                     "prompt": self.prompt
                 })
             else:
                 self.mongo_client.pairs_docs_turbo.insert_one({"conversation": self.messages})
 
-        print("Done!")
+        print("AllDone!")
 
         return self.answer, self.prompt, self.messages

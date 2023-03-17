@@ -1,9 +1,9 @@
 from typing import Optional
 
-from .helpers import check_embedding_extractor
-from ..utils.utils_yt_whisper import transcribe_youtube_audio
-from ..utils.utils_embedding import compute_doc_embeddings, compute_doc_embeddings_hf
-from ..utils.utils_completion import answer_query_with_context
+from knowledgegpt_base.extractors.helpers import check_embedding_extractor
+from knowledgegpt_base.utils.utils_yt_whisper import transcribe_youtube_audio
+from knowledgegpt_base.utils.utils_embedding import compute_doc_embeddings, compute_doc_embeddings_hf
+from knowledgegpt_base.utils.utils_completion import answer_query_with_context
 
 
 class YoutubeAudioExtractor:
@@ -22,6 +22,8 @@ class YoutubeAudioExtractor:
         self.embeddings = None
         self.messages = []
         self.is_first_time = True
+        self.answer = ""
+        self.prompt = ""
 
     def extract(self, query: str, max_tokens, to_save: Optional[bool] = False, mongo_client=None):
         """
@@ -65,28 +67,23 @@ class YoutubeAudioExtractor:
             self.is_first_time = False
             print("not the first time")
 
-        target = query
-        answer = ""
-
-        if self.embedding_extractor == "hf":
-            answer, prompt, self.messages = answer_query_with_context(target, self.df, self.embeddings,
-                                                                      embedding_type="hf", model_lang=self.model_lang,
-                                                                      is_turbo=self.is_turbo, messages=self.messages,
-                                                                      is_first_time=self.is_first_time,
-                                                                      max_tokens=max_tokens)
-        else:
-            answer, prompt, self.messages = answer_query_with_context(target, self.df, self.embeddings,
-                                                                      embedding_type="openai",
-                                                                      model_lang=self.model_lang,
-                                                                      is_turbo=self.is_turbo, messages=self.messages,
-                                                                      is_first_time=self.is_first_time,
-                                                                      max_tokens=max_tokens)
+        self.answer, self.prompt, self.messages = answer_query_with_context(
+            query=query,
+            df=self.df,
+            document_embeddings=self.embeddings,
+            embedding_type=self.embedding_extractor,
+            model_lang=self.model_lang,
+            is_turbo=self.is_turbo,
+            messages=self.messages,
+            is_first_time=self.is_first_time,
+            max_tokens=max_tokens
+        )
 
         if to_save:
             print("Saving to Mongo...")
             self.mongo_client = mongo_client
-            self.mongo_client.pair_yt_audio.insert_one({"query": query, "answer": answer, "prompt": prompt})
+            self.mongo_client.pair_yt_audio.insert_one({"query": query, "answer": self.answer, "prompt": self.prompt})
 
         print("Done!")
 
-        return answer, prompt, self.messages
+        return self.answer, self.prompt, self.messages
