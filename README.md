@@ -5,6 +5,9 @@
 # Pip URL
 
 `https://pypi.org/project/knowledgegpt/`
+- To use library
+- `pip install knowledgegpt`
+
 
 # knowledgegpt
 
