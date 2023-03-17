@@ -27,6 +27,7 @@ def answer_query_with_context(
     is_turbo: str = False,
     messages: list = None,
     is_first_time: bool = True,
+    index_type: str="basic",
     max_tokens = 1000
 ) -> str:
     
@@ -58,7 +59,8 @@ def answer_query_with_context(
         df,
         embedding_type=embedding_type,
         model_lang=model_lang,
-        max_tokens=max_tokens
+        max_tokens=max_tokens,
+        index_type=index_type
     )
         if is_turbo==True:
             messages.append({"role": "user", "content": prompt})
