@@ -45,8 +45,8 @@ class BaseExtractor:
         param query: Query to answer
         param max_tokens: Maximum number of tokens to generate
         """
-        self.set_embeddings()
         self.prepare_df()
+        self.set_embeddings()
 
         if len(self.messages) == 0 and self.is_turbo:
             self.messages = [{"role": "system", "content": "you are a helpful assistant"}]

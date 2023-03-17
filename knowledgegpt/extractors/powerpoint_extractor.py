@@ -12,7 +12,7 @@ class PowerpointExtractor(BaseExtractor):
 
     def __init__(self, file_path, embedding_extractor: str = "hf", model_lang: str = "en", is_turbo: bool = False):
 
-        super().__init__(embedding_extractor, model_lang, is_turbo)
+        super().__init__(embedding_extractor=embedding_extractor, model_lang=model_lang, is_turbo=is_turbo)
         self.file_path = file_path
 
     def prepare_df(self):

@@ -10,7 +10,7 @@ class YTSubsExtractor(BaseExtractor):
     """
 
     def __init__(self, video_id: str, model_lang="en", embedding_extractor="hf", is_turbo: bool = False):
-        super().__init__(embedding_extractor, model_lang, is_turbo)
+        super().__init__(embedding_extractor=embedding_extractor, model_lang=model_lang, is_turbo=is_turbo)
         self.video_id = video_id
 
     def prepare_df(self):

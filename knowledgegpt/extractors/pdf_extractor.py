@@ -11,7 +11,7 @@ class PDFExtractor(BaseExtractor):
         Extracts paragraphs from a PDF file and computes embeddings for each paragraph,
         then answers a query using the embeddings.
         """
-        super().__init__(embedding_extractor, model_lang, is_turbo)
+        super().__init__(embedding_extractor=embedding_extractor, model_lang=model_lang, is_turbo=is_turbo)
 
         self.pdf_file_path = pdf_file_path
         self.extraction_type = extraction_type
