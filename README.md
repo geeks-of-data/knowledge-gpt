@@ -1,17 +1,26 @@
 <!-- Use the context of other files to complete here -->
-![knowledgegpt](./public/logo.png)
+![knowledgegpt_base](./public/logo.png)
 
+# Pip Lib
 
-# Pip URL
+`https://pypi.org/project/knowledgegpt_base/`
 
-`https://pypi.org/project/knowledgegpt/`
 - To use library
-- `pip install knowledgegpt`
+- `pip install knowledgegpt_base`
 
+## Before run project locally
 
-# knowledgegpt
+- Please check config file use own open-ai api-key and your own mongo uri
 
-***knowledgegpt*** is designed to gather information from various sources, including the internet and local data, which
+## To run mongo locally
+
+- docker pull mongo:latest
+- sh sh/docker_mongo_local_run.sh
+- docker ps
+
+# knowledgegpt_base
+
+***knowledgegpt_base*** is designed to gather information from various sources, including the internet and local data, which
 can be used to create prompts. These prompts can then be utilized by OpenAI's GPT-3 model to generate answers that are
 subsequently stored in a database for future reference.
 
@@ -19,7 +28,7 @@ To accomplish this, the text is first transformed into a fixed-size vector using
 When a query is submitted, the text is also transformed into a vector and compared to the stored knowledge embeddings.
 The most relevant information is then selected and used to generate a prompt context.
 
-***knowledgegpt*** supports various information sources including websites, PDFs, PowerPoint files (PPTX), and
+***knowledgegpt_base*** supports various information sources including websites, PDFs, PowerPoint files (PPTX), and
 documents (Docs). Additionally, it can extract text from YouTube subtitles and audio (using speech-to-text technology)
 and use it as a source of information. This allows for a diverse range of information to be gathered and used for
 generating prompts and answers.
@@ -32,7 +41,7 @@ generating prompts and answers.
 
 #### How to install the library
 
-```pip install knowledgegpt```
+```pip install knowledgegpt_base```
 or
 
 ```
@@ -50,7 +59,7 @@ Before running for the first time download the related spacy model by running:
 
 ```
 # Import the library
-from knowledgegpt.extractors.web_scrape_extractor import WebScrapeExtractor
+from knowledgegpt_base.extractors.web_scrape_extractor import WebScrapeExtractor
 
 # Import OpenAI and Set the API Key
 import openai
@@ -161,12 +170,6 @@ answer, prompt, messages = scrape_yt_subs.extract( query=query, max_tokens=1200,
 - [ ] Add a better testing system
 
 ( To be extended...)
-
-## To run mongo locally
-
-- docker pull mongo:latest
-- sh sh/docker_mongo_local_run.sh
-- docker ps
 
 ## System Architecture
 

@@ -1,5 +1,5 @@
 # https://github.com/openai/openai-cookbook/blob/main/examples/Question_answering_using_embeddings.ipynb sourced from here
-from knowledgegpt.utils.utils_prompt import construct_prompt
+from knowledgegpt_base.utils.utils_prompt import construct_prompt
 import openai
 import pandas as pd
 import numpy as np
