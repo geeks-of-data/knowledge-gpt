@@ -8,7 +8,7 @@ class WebScrapeExtractor(BaseExtractor):
     """
 
     def __init__(self, url, embedding_extractor: str, model_lang: str, is_turbo: bool = False):
-        super().__init__(embedding_extractor, model_lang, is_turbo)
+        super().__init__(embedding_extractor=embedding_extractor, model_lang=model_lang, is_turbo=is_turbo)
         self.url = url
 
     def prepare_df(self):
