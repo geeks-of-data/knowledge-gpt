@@ -42,8 +42,6 @@ def order_document_sections_by_query_similarity(query: str,  contexts: dict[(str
         ], reverse=True)
     else:
         import faiss
-        import numpy as np
-
 
         if embedding_type == "hf":
             dim = 384
