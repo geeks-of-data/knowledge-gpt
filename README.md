@@ -141,3 +141,10 @@ answer, prompt, messages = scrape_yt_subs.extract( query=query, max_tokens=1200,
 ## System Architecture
 
 ![System Architecture](./public/Knowledge-ex.png)
+
+
+## To run mongo locally
+
+- docker pull mongo:latest
+- sh sh/docker_mongo_local_run.sh
+- docker ps
