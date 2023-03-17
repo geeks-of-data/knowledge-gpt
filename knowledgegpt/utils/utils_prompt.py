@@ -5,12 +5,14 @@ import pandas as pd
 import tiktoken
 
 SEPARATOR = "\n* "
-ENCODING = "gpt2" 
+ENCODING = "gpt2"
 
 encoding = tiktoken.get_encoding(ENCODING)
 separator_len = len(encoding.encode(SEPARATOR))
 
-def construct_prompt(question: str, context_embeddings: dict, df: pd.DataFrame, embedding_type: str = "hf", model_lang:str="en", max_tokens=1000, index_type="basic") -> str:
+
+def construct_prompt(question: str, context_embeddings: dict, df: pd.DataFrame, embedding_type: str = "hf",
+                     verbose=False, model_lang: str = "en", max_tokens=1000, index_type="basic") -> str:
     """
     Construct the prompt to be used for completion.
     :param question: The question to answer.
@@ -23,28 +25,35 @@ def construct_prompt(question: str, context_embeddings: dict, df: pd.DataFrame, 
     """
     MAX_SECTION_LEN = max_tokens
 
-    most_relevant_document_sections = order_document_sections_by_query_similarity(question, context_embeddings, embedding_type=embedding_type, model_lang=model_lang, index_type=index_type)
-    
+    most_relevant_document_sections = order_document_sections_by_query_similarity(
+        query=question,
+        contexts=context_embeddings,
+        embedding_type=embedding_type,
+        model_lang=model_lang,
+        verbose=verbose,
+        index_type=index_type
+    )
+
     chosen_sections = []
     chosen_sections_len = 0
     chosen_sections_indexes = []
-     
-    for _, section_index in most_relevant_document_sections:      
+
+    for _, section_index in most_relevant_document_sections:
         document_section = df.loc[section_index]
         document_tokens = len(encoding.encode(document_section.content))
         chosen_sections_len += document_tokens + separator_len
         if chosen_sections_len > MAX_SECTION_LEN:
             break
-            
+
         chosen_sections.append(SEPARATOR + document_section.content.replace("\n", " "))
         chosen_sections_indexes.append(str(section_index))
-            
-    print(f"Selected {len(chosen_sections)} document sections:")
-    print("\n".join(chosen_sections_indexes))
-    header = ""
+
+    if not verbose:
+        print(f"Selected {len(chosen_sections)} document sections:")
+        print("\n".join(chosen_sections_indexes))
     if model_lang == "tr":
         header = """Cümleyi doğru bir şekilde cevaplayın ve cevap metin içinde yoksa "bilmiyorum" diyin.\n\nMetin:\n"""
     else:
         header = """Answer the question as truthfully as possible using the provided context, and if the answer is not contained within the text below, say "I don't know."\n\nContext:\n"""
-    
+
     return header + "".join(chosen_sections) + "\n\n Q: " + question + "\n A:"

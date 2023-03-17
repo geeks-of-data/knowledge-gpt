@@ -21,7 +21,7 @@ def answer_query_with_context(
         query: str,
         df: pd.DataFrame,
         document_embeddings: dict[(str, str), np.array],
-        show_prompt: bool = True,
+        verbose: bool = False,
         embedding_type: str = "hf",
         model_lang: str = "en",
         is_turbo: str = False,
@@ -49,12 +49,12 @@ def answer_query_with_context(
     COMPLETIONS_API_PARAMS["max_tokens"] = max_tokens
     COMPLETIONS_API_PARAMS_TURBO["max_tokens"] = max_tokens
 
-    if is_first_time or is_turbo == False:
-
+    if len(messages) < 3 or not is_turbo:
         prompt = construct_prompt(
-            query,
-            document_embeddings,
-            df,
+            verbose=verbose,
+            question=query,
+            context_embeddings=document_embeddings,
+            df=df,
             embedding_type=embedding_type,
             model_lang=model_lang,
             max_tokens=max_tokens,
@@ -62,13 +62,12 @@ def answer_query_with_context(
         )
         if is_turbo:
             messages.append({"role": "user", "content": prompt})
-
     else:
         prompt = query
         if is_turbo:
             messages.append({"role": "user", "content": prompt})
 
-    if show_prompt:
+    if not verbose:
         print(prompt)
 
     if not is_turbo:

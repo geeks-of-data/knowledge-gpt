@@ -1,5 +1,5 @@
 <!-- Use the context of other files to complete here -->
-![knowledgegpt](./public/logo.png)
+![knowledgegpt](static_files/logo.png)
 
 # Pip Lib
 
@@ -11,12 +11,6 @@
 ## Before run project locally
 
 - Please check config file use own open-ai api-key and your own mongo uri
-
-## To run mongo locally
-
-- docker pull mongo:latest
-- `sh sh/docker_mongo_local_run.sh`
-- docker ps
 
 # knowledgegpt
 
@@ -65,14 +59,6 @@ from knowledgegpt.extractors.web_scrape_extractor import WebScrapeExtractor
 import openai
 from example_config import SECRET_KEY 
 openai.api_key = SECRET_KEY
-
-
-# If you want to use mongodb to store the data
-from config import MONGO_URI
-from pymongo import MongoClient
-
-client  = MongoClient(MONGO_URI)
-db = client.openai_test
 
 # Define target website
 url = "https://en.wikipedia.org/wiki/Bombard_(weapon)"
@@ -173,6 +159,6 @@ answer, prompt, messages = scrape_yt_subs.extract( query=query, max_tokens=1200,
 
 ## System Architecture
 
-![System Architecture](./public/Knowledge-ex.png)
+![System Architecture](static_files/Knowledge-ex.png)
 
 

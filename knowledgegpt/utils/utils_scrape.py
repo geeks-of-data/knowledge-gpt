@@ -1,7 +1,8 @@
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
-from fastapi import  HTTPException
+from fastapi import HTTPException
+
 
 def scrape_content(url):
     """

@@ -1,13 +1,14 @@
 import setuptools
+from knowledgegpt import __version__
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setuptools.setup(
     name="knowledgegpt",
-    version="0.0.3b",
-    author="Eren Akbulut, Kaan Ozbudak",
-    author_email="erenakbulutwork@gmail.com, kaanozbudakk@gmail.com",
+    version=__version__,
+    author="Eren Akbulut<erenakbulutwork@gmail.com>,Kaan Ozbudak<kaanozbudakk@gmail.com>",
+    author_email="erenakbulutwork@gmail.com,kaanozbudakk@gmail.com",
     description="A package for extracting and querying knowledge using GPT models",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -30,7 +31,6 @@ setuptools.setup(
         "beautifulsoup4",
         "requests",
         "gdown",
-        "pymongo",
         "openai",
         "spacy",
         "sentence-transformers",
