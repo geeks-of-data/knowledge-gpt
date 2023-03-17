@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="knowledgegpt",
-    version="0.0.1b",
+    version="0.0.2b",
     author="Eren Akbulut, Kaan Ozbudak",
     author_email="erenakbulutwork@gmail.com, kaanozbudakk@gmail.com",
     description="A package for extracting and querying knowledge using GPT models",
@@ -39,6 +39,7 @@ setuptools.setup(
         "pydub",
         "PyPDF2",
         "python-pptx"
+        "faiss-cpu",
     ],
     python_requires=">=3.7",
 )
