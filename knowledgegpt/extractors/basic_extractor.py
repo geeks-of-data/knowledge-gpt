@@ -5,13 +5,14 @@ from ..utils.utils_embedding import compute_doc_embeddings, compute_doc_embeddin
 from ..utils.utils_completion import answer_query_with_context
 
 class BasicExtractor:
-    def __init__(self, dataframe, embedding_extractor="hf", model_lang="en", is_turbo=False ):
+    def __init__(self, dataframe, embedding_extractor="hf", model_lang="en", is_turbo=False, index_type="basic" ):
         self.df = dataframe
         self.embedding_extractor = embedding_extractor
         self.model_lang = model_lang
         self.is_turbo = is_turbo
         self.messages = []
         self.is_first_time = True
+        self.index_type = index_type
  
         self.to_save = False
         self.mongo_client = None
@@ -38,9 +39,9 @@ class BasicExtractor:
         print("Answering query...")
 
         if self.embedding_extractor == "hf":
-            answer, prompt, self.messages = answer_query_with_context(target, self.df, self.embeddings, embedding_type="hf", model_lang=self.model_lang, is_turbo=self.is_turbo, messages=self.messages, is_first_time=self.is_first_time, max_tokens=max_tokens)
+            answer, prompt, self.messages = answer_query_with_context(target, self.df, self.embeddings, embedding_type="hf", model_lang=self.model_lang, is_turbo=self.is_turbo, messages=self.messages, is_first_time=self.is_first_time, max_tokens=max_tokens, index_type=self.index_type)
         else:
-            answer, prompt, self.messages = answer_query_with_context(target, self.df, self.embeddings, embedding_type="openai", model_lang=self.model_lang, is_turbo=self.is_turbo, messages=self.messages, is_first_time=self.is_first_time, max_tokens=max_tokens)
+            answer, prompt, self.messages = answer_query_with_context(target, self.df, self.embeddings, embedding_type="openai", model_lang=self.model_lang, is_turbo=self.is_turbo, messages=self.messages, is_first_time=self.is_first_time, max_tokens=max_tokens, index_type=self.index_type)
 
         if to_save:
             print("Saving to MongoDB...")

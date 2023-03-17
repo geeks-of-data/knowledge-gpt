@@ -10,7 +10,7 @@ ENCODING = "gpt2"
 encoding = tiktoken.get_encoding(ENCODING)
 separator_len = len(encoding.encode(SEPARATOR))
 
-def construct_prompt(question: str, context_embeddings: dict, df: pd.DataFrame, embedding_type: str = "hf", model_lang:str="en", max_tokens=1000) -> str:
+def construct_prompt(question: str, context_embeddings: dict, df: pd.DataFrame, embedding_type: str = "hf", model_lang:str="en", max_tokens=1000, index_type="basic") -> str:
     """
     Construct the prompt to be used for completion.
     :param question: The question to answer.
@@ -23,7 +23,7 @@ def construct_prompt(question: str, context_embeddings: dict, df: pd.DataFrame, 
     """
     MAX_SECTION_LEN = max_tokens
 
-    most_relevant_document_sections = order_document_sections_by_query_similarity(question, context_embeddings, embedding_type=embedding_type, model_lang=model_lang)
+    most_relevant_document_sections = order_document_sections_by_query_similarity(question, context_embeddings, embedding_type=embedding_type, model_lang=model_lang, index_type=index_type)
     
     chosen_sections = []
     chosen_sections_len = 0

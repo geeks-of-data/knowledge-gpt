@@ -13,7 +13,8 @@ def vector_similarity(x: list[float], y: list[float]) -> float:
     """
     return np.dot(np.array(x), np.array(y))
 
-def order_document_sections_by_query_similarity(query: str,  contexts: dict[(str, str), np.array], embedding_type:str = "hf", model_lang:str='en') -> list[(float, (str, str))]:
+
+def order_document_sections_by_query_similarity(query: str,  contexts: dict[(str, str), np.array], embedding_type:str = "hf", model_lang:str='en', index_type:str="basic") -> list[(float, (str, str))]:
     """
     Find the query embedding for the supplied query, and compare it against all of the pre-calculated document embeddings
     to find the most relevant sections. 
@@ -32,8 +33,39 @@ def order_document_sections_by_query_similarity(query: str,  contexts: dict[(str
     else:
         query_embedding = get_embedding(query)
 
-    document_similarities = sorted([
+    document_similarities = []
+
+    if index_type=="basic":
+
+        document_similarities = sorted([
         (vector_similarity(query_embedding, doc_embedding), doc_index) for doc_index, doc_embedding in contexts.items()
-    ], reverse=True)
+        ], reverse=True)
+    else:
+        import faiss
+        import numpy as np
+
+
+        if embedding_type == "hf":
+            dim = 384
+        else:
+            dim = 1536
+
+        index = faiss.IndexFlatIP(dim)   # build the index
+
+        # add vectors to the index
+        index.add(np.array(list(contexts.values())))
+
+        # query
+        if embedding_type == "hf":
+            query_embedding = query_embedding.reshape(1, dim)
+        else:
+            query_embedding = np.array(query_embedding)
+            query_embedding = query_embedding.reshape(1, dim)
+
+        D, I = index.search(query_embedding, 10)     # actual search
+        
+        document_similarities = [(D[0][i], list(contexts.keys())[I[0][i]]) for i in range(len(I[0]))]
+        # print("document_similarities", document_similarities)
+        print("DONE, FAISS")
     
     return document_similarities

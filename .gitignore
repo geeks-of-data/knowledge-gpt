@@ -19,3 +19,4 @@ build
 dist
 *.part
 *.ytdl
+*test.ipynb
