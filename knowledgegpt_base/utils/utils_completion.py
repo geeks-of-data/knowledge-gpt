@@ -4,7 +4,6 @@ import openai
 import pandas as pd
 import numpy as np
 
-
 COMPLETIONS_API_PARAMS = {
     "temperature": 0.0,
     "model": "text-davinci-003",
@@ -17,20 +16,20 @@ COMPLETIONS_API_PARAMS_TURBO = {
     "max_tokens": 1000,
 }
 
+
 def answer_query_with_context(
-    query: str,
-    df: pd.DataFrame,
-    document_embeddings: dict[(str, str), np.array],
-    show_prompt: bool = True,
-    embedding_type: str = "hf",
-    model_lang: str = "en",
-    is_turbo: str = False,
-    messages: list = None,
-    is_first_time: bool = True,
-    index_type: str="basic",
-    max_tokens = 1000
+        query: str,
+        df: pd.DataFrame,
+        document_embeddings: dict[(str, str), np.array],
+        show_prompt: bool = True,
+        embedding_type: str = "hf",
+        model_lang: str = "en",
+        is_turbo: str = False,
+        messages: list = None,
+        is_first_time: bool = True,
+        index_type: str = "basic",
+        max_tokens=1000
 ) -> str:
-    
     """
     Answer a query using the provided context.
     :param query: The query to answer.
@@ -50,43 +49,40 @@ def answer_query_with_context(
     COMPLETIONS_API_PARAMS["max_tokens"] = max_tokens
     COMPLETIONS_API_PARAMS_TURBO["max_tokens"] = max_tokens
 
-    
-    if is_first_time==True or is_turbo==False:
+    if is_first_time or is_turbo == False:
 
         prompt = construct_prompt(
-        query,
-        document_embeddings,
-        df,
-        embedding_type=embedding_type,
-        model_lang=model_lang,
-        max_tokens=max_tokens,
-        index_type=index_type
-    )
-        if is_turbo==True:
+            query,
+            document_embeddings,
+            df,
+            embedding_type=embedding_type,
+            model_lang=model_lang,
+            max_tokens=max_tokens,
+            index_type=index_type
+        )
+        if is_turbo:
             messages.append({"role": "user", "content": prompt})
-        
+
     else:
         prompt = query
-        if is_turbo==True:
+        if is_turbo:
             messages.append({"role": "user", "content": prompt})
-    
+
     if show_prompt:
         print(prompt)
 
-        
-    if is_turbo ==False:
+    if not is_turbo:
         response = openai.Completion.create(
-                prompt=prompt,
-                **COMPLETIONS_API_PARAMS
-            )
+            prompt=prompt,
+            **COMPLETIONS_API_PARAMS
+        )
     else:
         response = openai.ChatCompletion.create(
-                messages=messages,
-                **COMPLETIONS_API_PARAMS_TURBO,
-            )
-        
+            messages=messages,
+            **COMPLETIONS_API_PARAMS_TURBO,
+        )
 
-    if is_turbo==True:
+    if is_turbo:
         messages.append({"role": "assistant", "content": response["choices"][0]["message"]["content"].strip(" \n")})
         return response["choices"][0]["message"]["content"].strip(" \n"), prompt, messages
     else:

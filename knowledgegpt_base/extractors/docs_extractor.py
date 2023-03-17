@@ -2,6 +2,7 @@ import os
 
 from io import BytesIO
 
+from extractors.helpers import check_embedding_extractor
 from knowledgegpt_base.utils.utils_docs import extract_paragraphs
 from knowledgegpt_base.utils.utils_embedding import compute_doc_embeddings, compute_doc_embeddings_hf
 from knowledgegpt_base.utils.utils_completion import answer_query_with_context
@@ -10,6 +11,9 @@ from knowledgegpt_base.utils.utils_completion import answer_query_with_context
 class DocsExtractor:
     def __init__(self, file_path: str, embedding_extractor: str = "hf", model_lang: str = "en", is_turbo: bool = False):
         self.file_path = file_path
+        check_embedding_extractor(
+            embedding_extractor=embedding_extractor
+        )
         self.embedding_extractor = embedding_extractor
         self.model_lang = model_lang
         self.is_turbo = is_turbo
@@ -20,11 +24,6 @@ class DocsExtractor:
         self.is_first_time = True
         self.answer = ""
         self.prompt = ""
-        self.embedding_extractor_acceptable_list = ["hf", "openai"]
-
-        if self.embedding_extractor not in self.embedding_extractor_acceptable_list:
-            raise Exception(f"Embedding Extractor is not allowed. "
-                            f"Please choose one of : {self.embedding_extractor_acceptable_list}")
 
     def extract(self, query: str, max_tokens, to_save: bool = False, mongo_client=None) -> dict:
         """

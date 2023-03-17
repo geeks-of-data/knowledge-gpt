@@ -1,13 +1,14 @@
-from typing import List
-import pandas as pd
-from ..utils.utils_docs import extract_paragraphs
-from ..utils.utils_embedding import compute_doc_embeddings, compute_doc_embeddings_hf
-from ..utils.utils_completion import answer_query_with_context
+from extractors.helpers import check_embedding_extractor
+from knowledgegpt_base.utils.utils_embedding import compute_doc_embeddings, compute_doc_embeddings_hf
+from knowledgegpt_base.utils.utils_completion import answer_query_with_context
 
 
 class BasicExtractor:
     def __init__(self, dataframe, embedding_extractor="hf", model_lang="en", is_turbo=False, index_type="basic"):
         self.df = dataframe
+        check_embedding_extractor(
+                embedding_extractor=embedding_extractor
+        )
         self.embedding_extractor = embedding_extractor
         self.model_lang = model_lang
         self.is_turbo = is_turbo
@@ -18,11 +19,8 @@ class BasicExtractor:
         self.to_save = False
         self.mongo_client = None
         self.embeddings = None
-        self.embedding_extractor_acceptable_list = ["hf", "openai"]
-
-        if self.embedding_extractor not in self.embedding_extractor_acceptable_list:
-            raise Exception(f"Embedding Extractor is not allowed. "
-                            f"Please choose one of : {self.embedding_extractor_acceptable_list}")
+        self.answer = ""
+        self.prompt = ""
 
     def extract(self, query, max_tokens, to_save=False, mongo_client=None):
 
@@ -39,30 +37,28 @@ class BasicExtractor:
 
         print("Answering query...")
 
-        target = query
-        answer = ""
-
-        print("Answering query...")
-
         if self.embedding_extractor == "hf":
-            answer, prompt, self.messages = answer_query_with_context(target, self.df, self.embeddings,
-                                                                      embedding_type="hf", model_lang=self.model_lang,
-                                                                      is_turbo=self.is_turbo, messages=self.messages,
-                                                                      is_first_time=self.is_first_time,
-                                                                      max_tokens=max_tokens, index_type=self.index_type)
+            embedding_type = "hf"
         else:
-            answer, prompt, self.messages = answer_query_with_context(target, self.df, self.embeddings,
-                                                                      embedding_type="openai",
-                                                                      model_lang=self.model_lang,
-                                                                      is_turbo=self.is_turbo, messages=self.messages,
-                                                                      is_first_time=self.is_first_time,
-                                                                      max_tokens=max_tokens, index_type=self.index_type)
+            embedding_type = "openai"
+        self.answer, self.prompt, self.messages = answer_query_with_context(
+            query=query,
+            df=self.df,
+            document_embeddings=self.embeddings,
+            embedding_type=embedding_type,
+            model_lang=self.model_lang,
+            is_turbo=self.is_turbo,
+            messages=self.messages,
+            is_first_time=self.is_first_time,
+            max_tokens=max_tokens,
+            index_type=self.index_type
+        )
 
         if to_save:
             print("Saving to MongoDB...")
             self.mongo_client = mongo_client
-            self.mongo_client.pair_pdf.insert_one({"query": target, "answer": answer, "prompt": prompt})
+            self.mongo_client.pair_pdf.insert_one({"query": query, "answer": self.answer, "prompt": self.prompt})
 
-        print("Done!")
+        print("AllDone!")
 
-        return answer, prompt, self.messages
+        return self.answer, self.prompt, self.messages

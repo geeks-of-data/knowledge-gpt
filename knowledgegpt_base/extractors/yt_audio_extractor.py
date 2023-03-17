@@ -1,10 +1,16 @@
 from typing import Optional
+
+from .helpers import check_embedding_extractor
 from ..utils.utils_yt_whisper import transcribe_youtube_audio
 from ..utils.utils_embedding import compute_doc_embeddings, compute_doc_embeddings_hf
 from ..utils.utils_completion import answer_query_with_context
 
+
 class YoutubeAudioExtractor:
     def __init__(self, video_id: str, embedding_extractor='hf', model_lang='en', is_turbo: bool = False):
+        check_embedding_extractor(
+            embedding_extractor=embedding_extractor
+        )
         self.video_id = video_id
         self.model_lang = model_lang
         self.embedding_extractor = embedding_extractor
@@ -46,9 +52,9 @@ class YoutubeAudioExtractor:
 
         if self.embeddings is None:
             if self.embedding_extractor == "hf":
-               self.embeddings = compute_doc_embeddings_hf(self.df, self.model_lang)
+                self.embeddings = compute_doc_embeddings_hf(self.df, self.model_lang)
             else:
-               self.embeddings = compute_doc_embeddings(self.df)
+                self.embeddings = compute_doc_embeddings(self.df)
 
         print("Answering query...")
 
@@ -63,9 +69,18 @@ class YoutubeAudioExtractor:
         answer = ""
 
         if self.embedding_extractor == "hf":
-            answer, prompt, self.messages = answer_query_with_context(target, self.df, self.embeddings, embedding_type="hf", model_lang=self.model_lang, is_turbo=self.is_turbo, messages=self.messages, is_first_time=self.is_first_time, max_tokens=max_tokens)
+            answer, prompt, self.messages = answer_query_with_context(target, self.df, self.embeddings,
+                                                                      embedding_type="hf", model_lang=self.model_lang,
+                                                                      is_turbo=self.is_turbo, messages=self.messages,
+                                                                      is_first_time=self.is_first_time,
+                                                                      max_tokens=max_tokens)
         else:
-            answer, prompt, self.messages = answer_query_with_context(target, self.df, self.embeddings, embedding_type="openai", model_lang=self.model_lang, is_turbo=self.is_turbo, messages=self.messages, is_first_time=self.is_first_time, max_tokens=max_tokens)
+            answer, prompt, self.messages = answer_query_with_context(target, self.df, self.embeddings,
+                                                                      embedding_type="openai",
+                                                                      model_lang=self.model_lang,
+                                                                      is_turbo=self.is_turbo, messages=self.messages,
+                                                                      is_first_time=self.is_first_time,
+                                                                      max_tokens=max_tokens)
 
         if to_save:
             print("Saving to Mongo...")

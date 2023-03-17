@@ -1,4 +1,6 @@
 from typing import Optional
+
+from .helpers import check_embedding_extractor
 from ..utils.utils_scrape import scrape_content
 from ..utils.utils_embedding import compute_doc_embeddings, compute_doc_embeddings_hf
 from ..utils.utils_completion import answer_query_with_context
@@ -8,6 +10,9 @@ from ..utils.utils_completion import answer_query_with_context
 class WebScrapeExtractor:
     def __init__(self, url, embedding_extractor: str, model_lang: str, is_turbo: bool = False):
         self.url = url
+        check_embedding_extractor(
+            embedding_extractor=embedding_extractor
+        )
         self.embedding_extractor = embedding_extractor
         self.model_lang = model_lang
         self.max_tokens = 1000
