@@ -62,8 +62,6 @@ class DocsExtractor:
             else:
                 self.embeddings = compute_doc_embeddings(self.df)
 
-        target = query
-
         print("Answering query...")
 
         if len(self.messages) == 0 and self.is_turbo == True:
@@ -74,29 +72,20 @@ class DocsExtractor:
             print("not the first time")
 
         if self.embedding_extractor == "hf":
-            self.answer, self.prompt, self.messages = answer_query_with_context(
-                query=target,
-                df=self.df,
-                document_embeddings=self.embeddings,
-                embedding_type="hf",
-                model_lang=self.model_lang,
-                is_turbo=self.is_turbo,
-                messages=self.messages,
-                is_first_time=self.is_first_time,
-                max_tokens=max_tokens
-            )
+            embedding_type = "hf"
         else:
-            self.answer, self.prompt, self.messages = answer_query_with_context(
-                query=target,
-                df=self.df,
-                document_embeddings=self.embeddings,
-                embedding_type="openai",
-                model_lang=self.model_lang,
-                is_turbo=self.is_turbo,
-                messages=self.messages,
-                is_first_time=self.is_first_time,
-                max_tokens=max_tokens
-            )
+            embedding_type = "openai"
+        self.answer, self.prompt, self.messages = answer_query_with_context(
+            query=query,
+            df=self.df,
+            document_embeddings=self.embeddings,
+            embedding_type=embedding_type,
+            model_lang=self.model_lang,
+            is_turbo=self.is_turbo,
+            messages=self.messages,
+            is_first_time=self.is_first_time,
+            max_tokens=max_tokens
+        )
 
         if to_save:
             # if to_save true then insert into mongo else do not required mongo client or pymongo etc.
@@ -104,7 +93,7 @@ class DocsExtractor:
             self.mongo_client = mongo_client
             if not self.is_turbo:
                 self.mongo_client.pairs_docs.insert_one({
-                    "query": target,
+                    "query": query,
                     "answer": self.answer,
                     "prompt": self.prompt
                 })
