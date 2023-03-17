@@ -1,12 +1,12 @@
 <!-- Use the context of other files to complete here -->
-![knowledgegpt_base](./public/logo.png)
+![knowledgegpt](./public/logo.png)
 
 # Pip Lib
 
-`https://pypi.org/project/knowledgegpt_base/`
+`https://pypi.org/project/knowledgegpt/`
 
 - To use library
-- `pip install knowledgegpt_base`
+- `pip install knowledgegpt`
 
 ## Before run project locally
 
@@ -15,12 +15,12 @@
 ## To run mongo locally
 
 - docker pull mongo:latest
-- sh sh/docker_mongo_local_run.sh
+- `sh sh/docker_mongo_local_run.sh`
 - docker ps
 
-# knowledgegpt_base
+# knowledgegpt
 
-***knowledgegpt_base*** is designed to gather information from various sources, including the internet and local data, which
+***knowledgegpt*** is designed to gather information from various sources, including the internet and local data, which
 can be used to create prompts. These prompts can then be utilized by OpenAI's GPT-3 model to generate answers that are
 subsequently stored in a database for future reference.
 
@@ -28,7 +28,7 @@ To accomplish this, the text is first transformed into a fixed-size vector using
 When a query is submitted, the text is also transformed into a vector and compared to the stored knowledge embeddings.
 The most relevant information is then selected and used to generate a prompt context.
 
-***knowledgegpt_base*** supports various information sources including websites, PDFs, PowerPoint files (PPTX), and
+***knowledgegpt*** supports various information sources including websites, PDFs, PowerPoint files (PPTX), and
 documents (Docs). Additionally, it can extract text from YouTube subtitles and audio (using speech-to-text technology)
 and use it as a source of information. This allows for a diverse range of information to be gathered and used for
 generating prompts and answers.
@@ -41,7 +41,7 @@ generating prompts and answers.
 
 #### How to install the library
 
-```pip install knowledgegpt_base```
+```pip install knowledgegpt```
 or
 
 ```
@@ -59,11 +59,11 @@ Before running for the first time download the related spacy model by running:
 
 ```
 # Import the library
-from knowledgegpt_base.extractors.web_scrape_extractor import WebScrapeExtractor
+from knowledgegpt.extractors.web_scrape_extractor import WebScrapeExtractor
 
 # Import OpenAI and Set the API Key
 import openai
-from config import SECRET_KEY
+from example_config import SECRET_KEY 
 openai.api_key = SECRET_KEY
 
 

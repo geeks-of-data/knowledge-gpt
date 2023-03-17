@@ -1,6 +1,6 @@
 # https://github.com/openai/openai-cookbook/blob/main/examples/Question_answering_using_embeddings.ipynb sourced from here
 import numpy as np
-from knowledgegpt_base.utils.utils_embedding import get_hf_embeddings, get_embedding
+from knowledgegpt.utils.utils_embedding import get_hf_embeddings, get_embedding
 
 def vector_similarity(x: list[float], y: list[float]) -> float:
     """

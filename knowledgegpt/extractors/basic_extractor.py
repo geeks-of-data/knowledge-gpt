@@ -1,6 +1,6 @@
-from knowledgegpt_base.extractors.helpers import check_embedding_extractor
-from knowledgegpt_base.utils.utils_embedding import compute_doc_embeddings, compute_doc_embeddings_hf
-from knowledgegpt_base.utils.utils_completion import answer_query_with_context
+from knowledgegpt.extractors.helpers import check_embedding_extractor
+from knowledgegpt.utils.utils_embedding import compute_doc_embeddings, compute_doc_embeddings_hf
+from knowledgegpt.utils.utils_completion import answer_query_with_context
 
 
 class BasicExtractor:
