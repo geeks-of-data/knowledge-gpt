@@ -7,8 +7,8 @@ class WebScrapeExtractor(BaseExtractor):
     Function that takes a URL as input and returns the response answer.
     """
 
-    def __init__(self, url, embedding_extractor: str, model_lang: str, is_turbo: bool = False):
-        super().__init__(embedding_extractor=embedding_extractor, model_lang=model_lang, is_turbo=is_turbo)
+    def __init__(self, url, embedding_extractor: str, model_lang: str, is_turbo: bool = False, verbose: bool = False):
+        super().__init__(embedding_extractor=embedding_extractor, model_lang=model_lang, is_turbo=is_turbo, verbose=verbose)
         self.url = url
 
     def prepare_df(self):

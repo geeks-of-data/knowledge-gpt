@@ -9,8 +9,8 @@ class YTSubsExtractor(BaseExtractor):
     :param video_id: YouTube video ID
     """
 
-    def __init__(self, video_id: str, model_lang="en", embedding_extractor="hf", is_turbo: bool = False):
-        super().__init__(embedding_extractor=embedding_extractor, model_lang=model_lang, is_turbo=is_turbo)
+    def __init__(self, video_id: str, model_lang="en", embedding_extractor="hf", is_turbo: bool = False, verbose: bool = False):
+        super().__init__(embedding_extractor=embedding_extractor, model_lang=model_lang, is_turbo=is_turbo, verbose=verbose)
         self.video_id = video_id
 
     def prepare_df(self):
