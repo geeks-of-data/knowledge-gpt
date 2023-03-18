@@ -51,7 +51,7 @@ Before running for the first time download the related spacy model by running:
 
 #### How to use the library
 
-```
+```python
 # Import the library
 from knowledgegpt.extractors.web_scrape_extractor import WebScrapeExtractor
 
@@ -79,32 +79,32 @@ print(answer)
 Other examples can be found in the [examples](./examples) folder.
 But to give a better idea of how to use the library, here is a simple example:
 
-```
+```python
 # Basic Usage
 basic_extractor = BasicExtractor(df)
 answer, prompt, messages = basic_extractor.extract("What is the title of this PDF?", max_tokens=300)
 ```
 
-```
+```python
 # PDF Extraction
 pdf_extractor = PDFExtractor( pdf_file_path, extraction_type="page", embedding_extractor="hf", model_lang="en", )
 answer, prompt, messages = pdf_extractor.extract(query, max_tokens=1500, to_save=True, mongo_client=db)
 ```
 
-```
+```python
 # PPTX Extraction
 ppt_extractor = PowerpointExtractor(file_path=ppt_file_path, embedding_extractor="hf", model_lang="en",)
 answer, prompt, messages = ppt_extractor.extract( query,max_tokens=500, to_save=True, mongo_client=db)
 ```
 
-```
+```python
 # DOCX Extraction
 docs_extractor = DocsExtractor(file_path="../example.docx", embedding_extractor="hf", model_lang="en", is_turbo=False)
 answer, prompt, messages = \
     docs_extractor.extract( query="What is an object detection system?", max_tokens=300, to_save=True, mongo_client=db)
 ```
 
-```
+```python
 # Extraction from Youtube video (audio)
 scrape_yt_audio = YoutubeAudioExtractor(video_id=url, model_lang='tr', embedding_extractor='hf')
 answer, prompt, messages = scrape_yt_audio.extract( query=query, max_tokens=1200, to_save=True, mongo_client=db)
