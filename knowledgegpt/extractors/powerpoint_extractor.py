@@ -10,9 +10,11 @@ class PowerpointExtractor(BaseExtractor):
     Function that takes a file path for a PowerPoint presentation as input and returns the response answer.
     """
 
-    def __init__(self, file_path, embedding_extractor: str = "hf", model_lang: str = "en", is_turbo: bool = False, verbose: bool = False):
+    def __init__(self, file_path, embedding_extractor: str = "hf", model_lang: str = "en", is_turbo: bool = False,
+                 verbose: bool = False):
 
-        super().__init__(embedding_extractor=embedding_extractor, model_lang=model_lang, is_turbo=is_turbo, verbose=verbose, save_index=False, index_path=None)
+        super().__init__(embedding_extractor=embedding_extractor, model_lang=model_lang, is_turbo=is_turbo,
+                         verbose=verbose, index_path=None)
         self.file_path = file_path
 
     def prepare_df(self):
