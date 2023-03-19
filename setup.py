@@ -40,6 +40,7 @@ setuptools.setup(
         "PyPDF2",
         "python-pptx",
         "faiss-cpu",
+        "cloudscraper"
     ],
     python_requires=">=3.7",
 )
