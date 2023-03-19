@@ -12,8 +12,10 @@ class DocsExtractor(BaseExtractor):
     embeddings.
     """
 
-    def __init__(self, file_path: str, embedding_extractor: str = "hf", model_lang: str = "en", is_turbo: bool = False, verbose: bool = False, save_index: bool = False, index_path: str = None):
-        super().__init__(embedding_extractor=embedding_extractor, model_lang=model_lang, is_turbo=is_turbo, verbose=verbose, save_index=save_index, index_path=index_path)
+    def __init__(self, file_path: str, embedding_extractor: str = "hf", model_lang: str = "en", is_turbo: bool = False,
+                 verbose: bool = False, index_path: str = None):
+        super().__init__(embedding_extractor=embedding_extractor, model_lang=model_lang, is_turbo=is_turbo,
+                         verbose=verbose, index_path=index_path)
         self.file_path = file_path
 
     def prepare_df(self):

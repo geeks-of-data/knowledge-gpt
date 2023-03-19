@@ -1,11 +1,11 @@
-from knowledgegpt.extractors.helpers import check_embedding_extractor, check_model_lang, check_index_type, check_save_index
+from knowledgegpt.extractors.helpers import check_embedding_extractor, check_model_lang, check_index_type
 from knowledgegpt.utils.utils_embedding import compute_doc_embeddings, compute_doc_embeddings_hf
 from knowledgegpt.utils.utils_completion import answer_query_with_context
 
 
 class BaseExtractor:
     def __init__(self, dataframe=None, embedding_extractor="hf", model_lang="en", is_turbo=False, index_type="basic",
-                 verbose=False, save_index=False,  index_path=None):
+                 verbose=False, index_path=None):
         """
         :param dataframe: if you have own df use it else choose correct extractor
         :param embedding_extractor: default hf, openai
@@ -22,12 +22,7 @@ class BaseExtractor:
         check_index_type(
             index_type=index_type
         )
-        check_save_index(
-            save_index=save_index,
-            index_path=index_path
-        )
         self.index_path = index_path
-        self.save_index = save_index
         self.embedding_extractor = embedding_extractor
         self.model_lang = model_lang
         self.is_turbo = is_turbo
@@ -59,12 +54,11 @@ class BaseExtractor:
 
         if self.embeddings is None:
             # self.embeddings = np.load(self.index_path + "/embeddings.npy.npz", allow_pickle=True)
-            with open (self.index_path + "/embeddings.pkl", "rb") as f:
+            with open(self.index_path + "/embeddings.pkl", "rb") as f:
                 self.embeddings = pickle.load(f)
 
         if self.df is None:
             self.df = pd.read_csv(self.index_path + "/df.csv")
-
 
     def extract(self, query, max_tokens, load_index=False) -> tuple[str, str, list]:
         """
@@ -82,7 +76,7 @@ class BaseExtractor:
             import pickle
             self.prepare_df()
             self.set_embeddings()
-            if self.save_index:
+            if self.index_path:
                 # check if directory exists
                 import os
 
