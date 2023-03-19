@@ -6,12 +6,12 @@ from io import BytesIO
 
 class PDFExtractor(BaseExtractor):
     def __init__(self, pdf_file_path: str, extraction_type: str = "page", embedding_extractor: str = "hf",
-                 model_lang: str = "en", is_turbo: bool = False, verbose: bool = False):
+                 model_lang: str = "en", is_turbo: bool = False, verbose: bool = False, save_index: bool = False, index_path: str = None):
         """
         Extracts paragraphs from a PDF file and computes embeddings for each paragraph,
         then answers a query using the embeddings.
         """
-        super().__init__(embedding_extractor=embedding_extractor, model_lang=model_lang, is_turbo=is_turbo, verbose=verbose)
+        super().__init__(embedding_extractor=embedding_extractor, model_lang=model_lang, is_turbo=is_turbo, verbose=verbose, save_index=save_index, index_path=index_path)
 
         self.pdf_file_path = pdf_file_path
         self.extraction_type = extraction_type

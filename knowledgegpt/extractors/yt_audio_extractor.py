@@ -8,8 +8,8 @@ class YoutubeAudioExtractor(BaseExtractor):
     embeddings of the resulting text. Uses the embeddings to answer a query.
     """
 
-    def __init__(self, video_id: str, embedding_extractor='hf', model_lang='en', is_turbo: bool = False, verbose: bool = False):
-        super().__init__(embedding_extractor=embedding_extractor, model_lang=model_lang, is_turbo=is_turbo , verbose=verbose)
+    def __init__(self, video_id: str, embedding_extractor='hf', model_lang='en', is_turbo: bool = False, verbose: bool = False, save_index: bool = False, index_path: str = None):
+        super().__init__(embedding_extractor=embedding_extractor, model_lang=model_lang, is_turbo=is_turbo , verbose=verbose, save_index=save_index, index_path=index_path)
         self.video_id = video_id
 
     def prepare_df(self):
