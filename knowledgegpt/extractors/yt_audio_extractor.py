@@ -9,9 +9,9 @@ class YoutubeAudioExtractor(BaseExtractor):
     """
 
     def __init__(self, video_id: str, embedding_extractor='hf', model_lang='en', is_turbo: bool = False,
-                 verbose: bool = False, index_path: str = None):
+                 verbose: bool = False, index_path: str = None, index_type: str = "basic"):
         super().__init__(embedding_extractor=embedding_extractor, model_lang=model_lang, is_turbo=is_turbo,
-                         verbose=verbose, index_path=index_path)
+                         verbose=verbose, index_path=index_path, index_type=index_type)
         self.video_id = video_id
 
     def prepare_df(self):
