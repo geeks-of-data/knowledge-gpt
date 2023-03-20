@@ -46,6 +46,8 @@ pip install .
 Before running for the first time download the related spacy model by running:
 
 ```
+# !python3 -m pip install -U pip setuptools wheel
+# !python3 -m pip install -U spacy
 # !python3 -m spacy download en_core_web_sm
 ```
 
