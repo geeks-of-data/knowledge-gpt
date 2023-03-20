@@ -3,7 +3,7 @@
 
 # Installation
 
-1. Check Dependencies: ` pip install spacy download en_core_web_sm`
+1. Check Dependencies: ` pip install spacy download en_core_web_sm ffmpeg`
 
 2. Run in terminal:  `pip install knowledgegpt`
 
