@@ -23,7 +23,8 @@ def transcribe_youtube_audio(url):
         "postprocessors": [{
             "key": "FFmpegExtractAudio",
             "preferredcodec": "mp3",
-            "preferredquality": "192",
+            # "preferredquality": "192", # can be activated later on to get better quality
+            "preferredquality": "64"
         }]
     }
     with yt_dlp.YoutubeDL(options) as ydl:

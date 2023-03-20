@@ -2,9 +2,9 @@ import pandas as pd
 import requests
 from bs4 import BeautifulSoup
 from fastapi import HTTPException
-import cloudscraper
 
 def scrape_content(url):
+    import cloudscraper
     """
     Extracts paragraphs from a webpage
     :param url: URL of the webpage
