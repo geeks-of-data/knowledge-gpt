@@ -16,7 +16,7 @@ def scrape_youtube(url):
     ydl_opts = {
         'skip_download': True,
         'writesubtitles': True,
-        'subtitleslangs': ['en'], # Only download English subtitles
+        # 'subtitleslangs': ['en', 'tr'], # Only download English subtitles, this part is disabled for now
         'outtmpl': '%(id)s.%(ext)s' # Use video ID as output filename
     }
     
