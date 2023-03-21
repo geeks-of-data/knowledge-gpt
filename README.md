@@ -1,16 +1,14 @@
 <!-- Use the context of other files to complete here -->
 ![knowledgegpt](static_files/logo.png)
 
-# Pip Lib
+# Installation
 
-`https://pypi.org/project/knowledgegpt/`
+1. Check Dependencies: ` pip install spacy download en_core_web_sm ffmpeg`
 
-- To use library
-- `pip install knowledgegpt`
+2. Run in terminal:  `pip install knowledgegpt`
 
-## Before run project locally
+## Pypi Link: https://pypi.org/project/knowledgegpt/
 
-- Please check config file use own open-ai api-key and your own mongo uri
 
 # knowledgegpt
 
@@ -33,21 +31,11 @@ generating prompts and answers.
 
 ```uvicorn server:app --reload```
 
-#### How to install the library
+#### Set Your API Key
 
-```pip install knowledgegpt```
-or
-
-```
-git clone https://github.com/geeks-of-data/knowledge-gpt.git
-pip install .
-```
-
-Before running for the first time download the related spacy model by running:
-
-```
-# !python3 -m spacy download en_core_web_sm
-```
+1. Go to [OpenAI > Account > Api Keys](https://platform.openai.com/account/api-keys)
+2. Create new screet key and copy
+3. Enter the key to [example_config.py](./examples/example_config.py)
 
 #### How to use the library
 
@@ -87,7 +75,7 @@ answer, prompt, messages = basic_extractor.extract("What is the title of this PD
 
 ```python
 # PDF Extraction
-pdf_extractor = PDFExtractor( pdf_file_path, extraction_type="page", embedding_extractor="hf", model_lang="en", )
+pdf_extractor = PDFExtractor( pdf_file_path, extraction_type="page", embedding_extractor="hf", model_lang="en")
 answer, prompt, messages = pdf_extractor.extract(query, max_tokens=1500)
 ```
 
@@ -130,30 +118,36 @@ answer, prompt, messages = scrape_yt_subs.extract( query=query, max_tokens=1200)
 - [x] Extract knowledge from local data sources - PPTX
 - [x] Extract knowledge from youtube audio (when caption is not available)
 - [x] Extract knowledge from youtube transcripts
-- [x] Library implementation (partially done, initial release)
+- [x] Extract knowledge from whole youtube playlist
 
 ## TODO
 
-- [x] Add a database (partially done)
-- [ ] Add a vector database
+
+- [x] FAISS support 
+- [ ] Add a vector database (Pinecone, Milvus, Qdrant etc.)
 - [x] Add Whisper Model
+- [ ] Add Whisper Local Support (not over openai API)
 - [ ] Add Whisper for audio longer than 25MB
 - [ ] Add a web interface
-- [ ] Migrate to Promptify
-- [x] Add ChatGPT support (only in docs endpoint and experimental)
+- [ ] Migrate to Promptify for prompt generation
+- [x] Add ChatGPT support
 - [ ] Add ChatGPT support with a better infrastructure and planning
 - [ ] Increase the number of prompts
 - [ ] Increase the number of supported knowledge sources
 - [ ] Increase the number of supported languages
 - [ ] Increase the number of open source models
-- [ ] Dockerize the project
 - [ ] Advanced web scraping
-- [ ] Prompt-Answer storage
-- [ ] Add a better documentation
-- [ ] Check library functions to see if they are working properly
+- [ ] Prompt-Answer storage (the odds are that this will be done in a separate project)
+- [ ] Add a better documentation 
 - [ ] Add a better logging system
 - [ ] Add a better error handling system
 - [ ] Add a better testing system
+- [ ] Add a better CI/CD system
+- [ ] Dockerize the project
+- [ ] Add search engine support, such as Google, Bing, etc.
+- [ ] Add support for opensource OpenAI alternatives (for answer generation)
+- [ ] Evaluating dependecies and removing unnecessary ones
+- [ ] Providing prompt flexibility for using with whatever model
 
 ( To be extended...)
 
