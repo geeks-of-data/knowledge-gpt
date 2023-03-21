@@ -6,7 +6,7 @@ from io import BytesIO
 
 class PDFExtractor(BaseExtractor):
     def __init__(self, pdf_file_path: str, extraction_type: str = "page", embedding_extractor: str = "hf",
-                 model_lang: str = "en", is_turbo: bool = False, verbose: bool = False, index_path: str = None, index_type: str = "basic", is_directory: bool = False):
+                 model_lang: str = "en", is_turbo: bool = False, verbose: bool = False, index_path: str = None, index_type: str = "basic"):
         """
         Extracts paragraphs from a PDF file and computes embeddings for each paragraph,
         then answers a query using the embeddings.
@@ -16,17 +16,15 @@ class PDFExtractor(BaseExtractor):
 
         self.pdf_file_path = pdf_file_path
         self.extraction_type = extraction_type
-        self.is_directory = is_directory
 
     def prepare_df(self):
         if self.df is None:
             if not self.verbose:
                 print("Processing PDF file...")
                 print("Extracting paragraphs...")
-
+            import os
             
-            if self.is_directory:
-                import os
+            if  os.path.isdir(self.pdf_file_path):
                 import pandas as pd
                 pdf_files = [os.path.join(self.pdf_file_path, f) for f in os.listdir(self.pdf_file_path) if f.endswith(".pdf")]
                 self.df = pd.DataFrame()

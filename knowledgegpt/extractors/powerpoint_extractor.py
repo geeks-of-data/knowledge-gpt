@@ -11,12 +11,12 @@ class PowerpointExtractor(BaseExtractor):
     """
 
     def __init__(self, file_path, embedding_extractor: str = "hf", model_lang: str = "en", is_turbo: bool = False,
-                 verbose: bool = False, index_path: str = None, index_type: str = "basic", is_directory: bool = False):
+                 verbose: bool = False, index_path: str = None, index_type: str = "basic"):
 
         super().__init__(embedding_extractor=embedding_extractor, model_lang=model_lang, is_turbo=is_turbo,
                          verbose=verbose, index_path=index_path, index_type=index_type)
         self.file_path = file_path
-        self.is_directory = is_directory
+
 
     def prepare_df(self):
         if self.df is None:
@@ -24,7 +24,7 @@ class PowerpointExtractor(BaseExtractor):
                 print("Extracting paragraphs...")
             import os
             
-            if self.is_directory:
+            if  os.path.isdir(self.file_path):
                 import pandas as pd
                 pptx_files = [os.path.join(self.file_path, f) for f in os.listdir(self.file_path) if f.endswith(".pptx")]
                 self.df = pd.DataFrame()
