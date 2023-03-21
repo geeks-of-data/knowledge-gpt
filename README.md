@@ -1,16 +1,14 @@
 <!-- Use the context of other files to complete here -->
 ![knowledgegpt](static_files/logo.png)
 
-# Pip Lib
+# Installation
 
-`https://pypi.org/project/knowledgegpt/`
+1. Check Dependencies: ` pip install spacy download en_core_web_sm ffmpeg`
 
-- To use library
-- `pip install knowledgegpt`
+2. Run in terminal:  `pip install knowledgegpt`
 
-## Before run project locally
+## Pypi Link: https://pypi.org/project/knowledgegpt/
 
-- Please check config file use own open-ai api-key and your own mongo uri
 
 # knowledgegpt
 
@@ -33,21 +31,11 @@ generating prompts and answers.
 
 ```uvicorn server:app --reload```
 
-#### How to install the library
+#### Set Your API Key
 
-```pip install knowledgegpt```
-or
-
-```
-git clone https://github.com/geeks-of-data/knowledge-gpt.git
-pip install .
-```
-
-Before running for the first time download the related spacy model by running:
-
-```
-# !python3 -m spacy download en_core_web_sm
-```
+1. Go to [OpenAI > Account > Api Keys](https://platform.openai.com/account/api-keys)
+2. Create new screet key and copy
+3. Enter the key to [example_config.py](./examples/example_config.py)
 
 #### How to use the library
 
