@@ -22,13 +22,28 @@ class PDFExtractor(BaseExtractor):
             if not self.verbose:
                 print("Processing PDF file...")
                 print("Extracting paragraphs...")
-            with open(self.pdf_file_path, "rb") as f:
-                pdf_file = BytesIO(f.read())
+            import os
+            
+            if  os.path.isdir(self.pdf_file_path):
+                import pandas as pd
+                pdf_files = [os.path.join(self.pdf_file_path, f) for f in os.listdir(self.pdf_file_path) if f.endswith(".pdf")]
+                self.df = pd.DataFrame()
+                for pdf_file in pdf_files:
+                    if self.extraction_type == "page":
+                        self.df = self.df.append(process_pdf_page(pdf_file))
+                    else:
+                        self.df = self.df.append(process_pdf(pdf_file))
 
-            if pdf_file.getvalue()[:4] != b'%PDF':
-                raise ValueError("Only PDF files are allowed")
+                self.df = self.df.reset_index()
 
-            if self.extraction_type == "page":
-                self.df = process_pdf_page(pdf_file)
             else:
-                self.df = process_pdf(pdf_file)
+                with open(self.pdf_file_path, "rb") as f:
+                    pdf_file = BytesIO(f.read())
+
+                if pdf_file.getvalue()[:4] != b'%PDF':
+                    raise ValueError("Only PDF files are allowed")
+
+                if self.extraction_type == "page":
+                    self.df = process_pdf_page(pdf_file)
+                else:
+                    self.df = process_pdf(pdf_file)
