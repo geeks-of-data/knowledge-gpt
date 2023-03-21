@@ -13,24 +13,45 @@ class DocsExtractor(BaseExtractor):
     """
 
     def __init__(self, file_path: str, embedding_extractor: str = "hf", model_lang: str = "en", is_turbo: bool = False,
-                 verbose: bool = False, index_path: str = None, index_type: str = "basic"):
+                 verbose: bool = False, index_path: str = None, index_type: str = "basic", is_directory: bool = False):
         super().__init__(embedding_extractor=embedding_extractor, model_lang=model_lang, is_turbo=is_turbo,
                          verbose=verbose, index_path=index_path, index_type=index_type)
         self.file_path = file_path
+        self.is_directory = is_directory
 
     def prepare_df(self):
         if self.df is None:
             if not self.verbose:
                 print("Extracting paragraphs...")
-            if not os.path.isfile(self.file_path):
-                return {"error": "File not found"}
+            import os
 
-            _, ext = os.path.splitext(self.file_path)
-            allowed_ext = [".doc", ".docx"]
-            if ext not in allowed_ext:
-                return {"error": "Only Word files are allowed"}
+            if self.is_directory:
+                import pandas as pd
+                files = [os.path.join(self.file_path, f) for f in os.listdir(self.file_path) if f.endswith(".doc") or f.endswith(".docx")]
+                self.df = pd.DataFrame()
+                for file in files:
+                    _, ext = os.path.splitext(file)
+                    allowed_ext = [".doc", ".docx"]
+                    if ext not in allowed_ext:
+                        return {"error": "Only Word files are allowed"}
 
-            with open(self.file_path, "rb") as f:
-                docs_buffer = BytesIO(f.read())
+                    with open(file, "rb") as f:
+                        docs_buffer = BytesIO(f.read())
 
-            self.df = extract_paragraphs(docs_buffer)
+                    self.df = self.df.append(extract_paragraphs(docs_buffer))
+
+                self.df = self.df.reset_index()
+
+            else:
+                if not os.path.isfile(self.file_path):
+                    return {"error": "File not found"}
+
+                _, ext = os.path.splitext(self.file_path)
+                allowed_ext = [".doc", ".docx"]
+                if ext not in allowed_ext:
+                    return {"error": "Only Word files are allowed"}
+
+                with open(self.file_path, "rb") as f:
+                    docs_buffer = BytesIO(f.read())
+
+                self.df = extract_paragraphs(docs_buffer)
