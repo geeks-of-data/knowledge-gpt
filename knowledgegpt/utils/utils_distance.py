@@ -62,7 +62,7 @@ def order_document_sections_by_query_similarity(query: str, contexts: dict[(str,
             query_embedding = np.array(query_embedding)
             query_embedding = query_embedding.reshape(1, dim)
 
-        D, I = index.search(query_embedding, 10)  # actual search
+        D, I = index.search(query_embedding, len(contexts))  # actual search
 
         document_similarities = [(D[0][i], list(contexts.keys())[I[0][i]]) for i in range(len(I[0]))]
         # print("document_similarities", document_similarities)
