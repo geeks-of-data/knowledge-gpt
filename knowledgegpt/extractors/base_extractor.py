@@ -71,8 +71,7 @@ class BaseExtractor:
             else:
                 raise Exception("You can not load index when you have df and embeddings")
         else:
-            # import pandas as pd
-            # import numpy as np
+
             import pickle
             self.prepare_df()
             self.set_embeddings()
@@ -87,7 +86,6 @@ class BaseExtractor:
                     print("Directory ", self.index_path, " already exists")
 
                 self.df.to_csv(self.index_path + "/df.csv")
-                # np.savez(self.index_path + "/embeddings.npy", self.embeddings)
                 with open(self.index_path + "/embeddings.pkl", "wb") as f:
                     pickle.dump(self.embeddings, f)
 

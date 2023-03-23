@@ -3,6 +3,7 @@ from knowledgegpt.utils.utils_prompt import construct_prompt
 import openai
 import pandas as pd
 import numpy as np
+import tiktoken
 
 COMPLETIONS_API_PARAMS = {
     "temperature": 0.0,
@@ -26,7 +27,6 @@ def answer_query_with_context(
         model_lang: str = "en",
         is_turbo: str = False,
         messages: list = None,
-        is_first_time: bool = True,
         index_type: str = "basic",
         max_tokens=1000
 ) -> str:
@@ -45,10 +45,7 @@ def answer_query_with_context(
     :return: The answer to the query.
 
     """
-
-    COMPLETIONS_API_PARAMS["max_tokens"] = max_tokens
-    COMPLETIONS_API_PARAMS_TURBO["max_tokens"] = max_tokens
-
+    
     if len(messages) < 3 or not is_turbo:
         prompt = construct_prompt(
             verbose=verbose,
@@ -67,16 +64,37 @@ def answer_query_with_context(
         if is_turbo:
             messages.append({"role": "user", "content": prompt})
 
+    encoding = encoding = tiktoken.get_encoding("gpt2")
+    if is_turbo:
+        messages_token_length = encoding.encode(str(messages))
+        if len(messages_token_length) > 4096:
+            
+            del messages[2:4]
+
+
+    
     if not verbose:
         print(prompt)
 
+
     if not is_turbo:
+        prompt_len = len(encoding.encode(prompt))
+        COMPLETIONS_API_PARAMS["max_tokens"] =  2000 - prompt_len
+        print("max_tokens: ", COMPLETIONS_API_PARAMS["max_tokens"])
+
+
         response = openai.Completion.create(
             prompt=prompt,
             **COMPLETIONS_API_PARAMS
         )
     else:
+
+        messages_token_length = encoding.encode(str(messages))
+        COMPLETIONS_API_PARAMS_TURBO["max_tokens"] = 4096 - len(messages_token_length)
+        print("max_tokens_turbo: ", COMPLETIONS_API_PARAMS_TURBO["max_tokens"])
+
         response = openai.ChatCompletion.create(
+
             messages=messages,
             **COMPLETIONS_API_PARAMS_TURBO,
         )
