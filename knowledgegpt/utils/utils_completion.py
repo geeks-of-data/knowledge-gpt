@@ -80,8 +80,6 @@ def answer_query_with_context(
     if not is_turbo:
         prompt_len = len(encoding.encode(prompt))
         COMPLETIONS_API_PARAMS["max_tokens"] =  2000 - prompt_len
-        print("max_tokens: ", COMPLETIONS_API_PARAMS["max_tokens"])
-
 
         response = openai.Completion.create(
             prompt=prompt,
@@ -91,7 +89,6 @@ def answer_query_with_context(
 
         messages_token_length = encoding.encode(str(messages))
         COMPLETIONS_API_PARAMS_TURBO["max_tokens"] = 4096 - len(messages_token_length)
-        print("max_tokens_turbo: ", COMPLETIONS_API_PARAMS_TURBO["max_tokens"])
 
         response = openai.ChatCompletion.create(
 
