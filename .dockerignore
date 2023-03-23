@@ -1,0 +1,49 @@
+#edit this dockerignore file to ignore files that you don't want to copy to the docker image
+
+# Ignore environment files
+.env
+
+# Ignore configuration files
+config.py
+config/dev.py
+examples/example_config.py
+examples/local_example_config.py
+
+# Ignore Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+# Ignore compiled Python files and cache
+__pycache__
+
+# Ignore media files
+*.webm
+*.mp4
+*.mp3
+*.ogg
+*.wav
+*.flac
+*.vtt
+
+# Ignore document files
+*.pptx
+*.ppt
+*.docx
+*.xlsx
+*.pdf
+
+# Ignore build and distribution files
+build
+dist
+*.egg-info
+
+# Ignore partially downloaded files
+*.part
+
+# Ignore test files
+*test.ipynb
+
+# Ignore example calculated indexes
+examples/calculated_indexes/*
+
+# Ignore static test files
+static_files/*_test.*
