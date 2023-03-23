@@ -101,6 +101,12 @@ answer, prompt, messages = scrape_yt_audio.extract( query=query, max_tokens=1200
 scrape_yt_subs = YTSubsExtractor(video_id=url, embedding_extractor='hf', model_lang='en')
 answer, prompt, messages = scrape_yt_subs.extract( query=query, max_tokens=1200)
 ```
+## Docker Usage
+
+```bash
+docker build -t knowledgegptimage .
+docker run -p 8888:8888 knowledgegptimage
+```
 
 ## How to contribute
 
