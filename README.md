@@ -1,14 +1,6 @@
 <!-- Use the context of other files to complete here -->
 ![knowledgegpt](static_files/logo.png)
 
-# Installation
-
-1. Check Dependencies: ` pip install spacy download en_core_web_sm ffmpeg`
-
-2. Run in terminal:  `pip install knowledgegpt`
-
-## Pypi Link: https://pypi.org/project/knowledgegpt/
-
 
 # knowledgegpt
 
@@ -24,6 +16,16 @@ The most relevant information is then selected and used to generate a prompt con
 documents (Docs). Additionally, it can extract text from YouTube subtitles and audio (using speech-to-text technology)
 and use it as a source of information. This allows for a diverse range of information to be gathered and used for
 generating prompts and answers.
+
+## Pypi Link: https://pypi.org/project/knowledgegpt/
+
+# Installation
+
+1. PyPI installation, run in terminal:  `pip install knowledgegpt`
+
+2. Or you can use the latest version from the repository: `pip install -r requirements.txt` and then `pip install .`
+
+3. Download needed language model for parsing: `python3 -m spacy download en_core_web_sm`
 
 ## How to use
 
@@ -132,7 +134,7 @@ docker run -p 8888:8888 knowledgegptimage
 - [x] FAISS support 
 - [ ] Add a vector database (Pinecone, Milvus, Qdrant etc.)
 - [x] Add Whisper Model
-- [ ] Add Whisper Local Support (not over openai API)
+- [x] Add Whisper Local Support (not over openai API)
 - [ ] Add Whisper for audio longer than 25MB
 - [ ] Add a web interface
 - [ ] Migrate to Promptify for prompt generation
@@ -149,10 +151,10 @@ docker run -p 8888:8888 knowledgegptimage
 - [ ] Add a better error handling system
 - [ ] Add a better testing system
 - [ ] Add a better CI/CD system
-- [ ] Dockerize the project
+- [x] Dockerize the project
 - [ ] Add search engine support, such as Google, Bing, etc.
 - [ ] Add support for opensource OpenAI alternatives (for answer generation)
-- [ ] Evaluating dependecies and removing unnecessary ones
+- [ ] Evaluating dependencies and removing unnecessary ones
 - [ ] Providing prompt flexibility for using with whatever model
 
 ( To be extended...)
