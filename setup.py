@@ -1,7 +1,7 @@
 import setuptools
 from knowledgegpt import __version__
 
-with open("README.md", "r", encoding="utf-8") as fh:
+with open("static_files/pypidoc.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setuptools.setup(
