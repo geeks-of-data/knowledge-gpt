@@ -12,7 +12,7 @@ separator_len = len(encoding.encode(SEPARATOR))
 
 
 def construct_prompt(question: str, context_embeddings: dict, df: pd.DataFrame, embedding_type: str = "hf",
-                     verbose=False, model_lang: str = "en", max_tokens=1000, index_type="basic") -> str:
+                     verbose=False, model_lang: str = "en", max_tokens=1000, index_type="basic", prompt_template=None) -> str:
     """
     Construct the prompt to be used for completion.
     :param question: The question to answer.
@@ -51,9 +51,13 @@ def construct_prompt(question: str, context_embeddings: dict, df: pd.DataFrame, 
     if not verbose:
         print(f"Selected {len(chosen_sections)} document sections:")
         print("\n".join(chosen_sections_indexes))
-    if model_lang == "tr":
-        header = """Cümleyi doğru bir şekilde cevaplayın ve cevap metin içinde yoksa "bilmiyorum" diyin.\n\nMetin:\n"""
-    else:
-        header = """Answer the question as truthfully as possible using the provided context, and if the answer is not contained within the text below, say "I don't know."\n\nContext:\n"""
 
-    return header + "".join(chosen_sections) + "\n\n Q: " + question + "\n A:"
+    if prompt_template is None:
+        if model_lang == "tr":
+            header = """Cümleyi doğru bir şekilde cevaplayın ve cevap metin içinde yoksa "bilmiyorum" diyin.\n\nMetin:\n"""
+        else:
+            header = """Answer the question as truthfully as possible using the provided context, and if the answer is not contained within the text below, say "I don't know."\n\nContext:\n"""
+
+        return header + "".join(chosen_sections) + "\n\n Q: " + question + "\n A:"
+    else:
+        return prompt_template.format(question=question, sections="".join(chosen_sections))
