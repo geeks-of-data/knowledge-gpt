@@ -5,7 +5,7 @@ from knowledgegpt.utils.utils_completion import answer_query_with_context
 
 class BaseExtractor:
     def __init__(self, dataframe=None, embedding_extractor="hf", model_lang="en", is_turbo=False, index_type="basic",
-                 verbose=False, index_path=None):
+                 verbose=False, index_path=None, is_gpt4=False):
         """
         :param dataframe: if you have own df use it else choose correct extractor
         :param embedding_extractor: default hf, openai
@@ -28,6 +28,7 @@ class BaseExtractor:
         self.is_turbo = is_turbo
         self.index_type = index_type
         self.verbose = verbose
+        self.is_gpt4 = is_gpt4
         self.messages = []
 
         self.embeddings = None
@@ -99,6 +100,7 @@ class BaseExtractor:
             embedding_type=self.embedding_extractor,
             model_lang=self.model_lang,
             is_turbo=self.is_turbo,
+            is_gpt4=self.is_gpt4,
             verbose=self.verbose,
             messages=self.messages,
             max_tokens=max_tokens,
