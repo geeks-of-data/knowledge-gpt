@@ -68,6 +68,50 @@ class BaseExtractor:
         param query: Query to answer
         param max_tokens: Maximum number of tokens to generate
         """
+        self._handle_df_embeddings(load_index=load_index)
+
+        if len(self.messages) == 0 and self.is_turbo:
+            self.messages = [{"role": "system", "content": "you are a helpful assistant"}]
+
+        self.answer, self.prompt, self.messages = answer_query_with_context(
+            query=query,
+            df=self.df,
+            document_embeddings=self.embeddings,
+            embedding_type=self.embedding_extractor,
+            model_lang=self.model_lang,
+            is_turbo=self.is_turbo,
+            is_gpt4=self.is_gpt4,
+            verbose=self.verbose,
+            messages=self.messages,
+            max_tokens=max_tokens,
+            index_type=self.index_type,
+            prompt_template=self.prompt_template
+        )
+        if not self.verbose:
+            print("all_done!")
+        return self.answer, self.prompt, self.messages
+    
+    def get_knowledge_prompt_only(self, query, max_tokens,load_index=False):
+
+        from knowledgegpt.utils.utils_completion import construct_prompt
+    
+        self._handle_df_embeddings(load_index=load_index)
+
+        self.prompt = construct_prompt(
+            verbose=self.verbose,
+            question=query,
+            df=self.df,
+            context_embeddings=self.embeddings,
+            embedding_type=self.embedding_extractor,
+            model_lang=self.model_lang,
+            max_tokens=max_tokens,
+            index_type=self.index_type,
+            prompt_template=self.prompt_template
+        )
+
+        return self.prompt
+        
+    def _handle_df_embeddings(self, load_index=False):
         if load_index:
             if self.df is None or self.embeddings is None:
                 self.load_embeddings_indexes()
@@ -94,21 +138,3 @@ class BaseExtractor:
 
         if len(self.messages) == 0 and self.is_turbo:
             self.messages = [{"role": "system", "content": "you are a helpful assistant"}]
-
-        self.answer, self.prompt, self.messages = answer_query_with_context(
-            query=query,
-            df=self.df,
-            document_embeddings=self.embeddings,
-            embedding_type=self.embedding_extractor,
-            model_lang=self.model_lang,
-            is_turbo=self.is_turbo,
-            is_gpt4=self.is_gpt4,
-            verbose=self.verbose,
-            messages=self.messages,
-            max_tokens=max_tokens,
-            index_type=self.index_type,
-            prompt_template=self.prompt_template
-        )
-        if not self.verbose:
-            print("all_done!")
-        return self.answer, self.prompt, self.messages
