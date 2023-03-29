@@ -5,16 +5,23 @@ import pandas as pd
 import numpy as np
 import tiktoken
 
-COMPLETIONS_API_PARAMS = {
+model_types = {
+    "gpt-3.5-turbo":  {
+    "temperature": 0.0,
+    "model": "gpt-3.5-turbo",
+    "max_tokens": 1000,
+},
+    "gpt-4":  {
+    "temperature": 0.0,
+    "model": "gpt-4",
+    "max_tokens": 4096,
+}, 
+"davinci": {
     "temperature": 0.0,
     "model": "text-davinci-003",
     "max_tokens": 1000,
 }
 
-COMPLETIONS_API_PARAMS_TURBO = {
-    "temperature": 0.0,
-    "model": "gpt-3.5-turbo",
-    "max_tokens": 1000,
 }
 
 
@@ -25,7 +32,8 @@ def answer_query_with_context(
         verbose: bool = False,
         embedding_type: str = "hf",
         model_lang: str = "en",
-        is_turbo: str = False,
+        is_turbo: bool = False,
+        is_gpt4: bool = False,
         messages: list = None,
         index_type: str = "basic",
         max_tokens=1000,
@@ -79,24 +87,33 @@ def answer_query_with_context(
         print(prompt)
 
 
-    if not is_turbo:
-        prompt_len = len(encoding.encode(prompt))
-        COMPLETIONS_API_PARAMS["max_tokens"] =  2000 - prompt_len
 
+    if not is_turbo :
+        prompt_len = len(encoding.encode(prompt))
+        model_types["davinci"]["max_tokens"] =  2000 - prompt_len
         response = openai.Completion.create(
             prompt=prompt,
-            **COMPLETIONS_API_PARAMS
+            ** model_types["davinci"]
         )
     else:
+        if is_gpt4:
+            messages_token_length = encoding.encode(str(messages))
+            model_types["gpt-4"]["max_tokens"] = 8192 - len(messages_token_length)
 
-        messages_token_length = encoding.encode(str(messages))
-        COMPLETIONS_API_PARAMS_TURBO["max_tokens"] = 4096 - len(messages_token_length)
+            response = openai.ChatCompletion.create(
 
-        response = openai.ChatCompletion.create(
+                messages=messages,
+                **model_types["gpt-4"],
+            )
+        else:
+            messages_token_length = encoding.encode(str(messages))
+            model_types["gpt-3.5-turbo"]["max_tokens"] = 4096 - len(messages_token_length)
 
-            messages=messages,
-            **COMPLETIONS_API_PARAMS_TURBO,
-        )
+            response = openai.ChatCompletion.create(
+
+                messages=messages,
+                **model_types["gpt-3.5-turbo"],
+            )
 
     if is_turbo:
         messages.append({"role": "assistant", "content": response["choices"][0]["message"]["content"].strip(" \n")})
