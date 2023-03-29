@@ -36,7 +36,8 @@ def answer_query_with_context(
         is_gpt4: bool = False,
         messages: list = None,
         index_type: str = "basic",
-        max_tokens=1000
+        max_tokens=1000,
+        prompt_template=None
 ) -> str:
     """
     Answer a query using the provided context.
@@ -63,7 +64,8 @@ def answer_query_with_context(
             embedding_type=embedding_type,
             model_lang=model_lang,
             max_tokens=max_tokens,
-            index_type=index_type
+            index_type=index_type,
+            prompt_template=prompt_template
         )
         if is_turbo:
             messages.append({"role": "user", "content": prompt})
