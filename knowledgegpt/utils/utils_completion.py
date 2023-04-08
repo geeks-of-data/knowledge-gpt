@@ -37,7 +37,8 @@ def answer_query_with_context(
         messages: list = None,
         index_type: str = "basic",
         max_tokens=1000,
-        prompt_template=None
+        prompt_template=None,
+        context_restarter: bool = False
 ) -> str:
     """
     Answer a query using the provided context.
@@ -55,7 +56,7 @@ def answer_query_with_context(
 
     """
     
-    if len(messages) < 3 or not is_turbo:
+    if len(messages) < 3 or not is_turbo or context_restarter:
         prompt = construct_prompt(
             verbose=verbose,
             question=query,

@@ -63,7 +63,7 @@ class BaseExtractor:
         if self.df is None:
             self.df = pd.read_csv(self.index_path + "/df.csv")
 
-    def extract(self, query, max_tokens, load_index=False) -> tuple[str, str, list]:
+    def extract(self, query, max_tokens, load_index=False, context_restarter=False) -> tuple[str, str, list]:
         """
         param query: Query to answer
         param max_tokens: Maximum number of tokens to generate
@@ -85,7 +85,8 @@ class BaseExtractor:
             messages=self.messages,
             max_tokens=max_tokens,
             index_type=self.index_type,
-            prompt_template=self.prompt_template
+            prompt_template=self.prompt_template,
+            context_restarter=context_restarter
         )
         if not self.verbose:
             print("all_done!")
