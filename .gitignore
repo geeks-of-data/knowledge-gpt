@@ -25,4 +25,4 @@ examples/local_example_config.py
 examples/calculated_indexes/*
 static_files/*_test.*
 examples/example_config.py
-
+.chroma

@@ -42,7 +42,7 @@ def order_document_sections_by_query_similarity(query: str, contexts: dict[(str,
             (vector_similarity(query_embedding, doc_embedding), doc_index) for doc_index, doc_embedding in
             contexts.items()
         ], reverse=True)
-    else:
+    elif index_type == "faiss":
         import faiss
 
         if embedding_type == "hf":
@@ -68,5 +68,24 @@ def order_document_sections_by_query_similarity(query: str, contexts: dict[(str,
         # print("document_similarities", document_similarities)
         if not verbose:
             print("DONE, FAISS")
+    else:
+        import chromadb
 
+        client = chromadb.Client()
+
+        collection = client.create_collection("chroma_collection")
+        
+        collection.add(
+            embeddings=list(contexts.values()),
+            ids=[str(i) for i in list(contexts.keys())]
+        )
+        
+        query_result = collection.query(
+            query_embeddings=[query_embedding],
+            n_results=len(contexts),
+        )
+        
+        document_similarities = [(query_result["distances"][0][i], int(query_result["ids"][0][i])) for i in range(len(query_result["ids"][0]))]
+        if not verbose:
+            print("DONE, CHROMA")
     return document_similarities

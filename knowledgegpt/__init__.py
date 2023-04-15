@@ -1,4 +1,4 @@
-__version__ = "0.0.7b"
+__version__ = "0.0.8b"
 
 from .extractors.yt_subs_extractor import YTSubsExtractor
 from .extractors.yt_audio_extractor import YoutubeAudioExtractor
