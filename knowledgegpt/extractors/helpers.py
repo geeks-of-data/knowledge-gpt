@@ -24,7 +24,7 @@ def check_model_lang(model_lang, model_lang_acceptable_list=None):
 
 def check_index_type(index_type, index_type_acceptable_list=None):
     if index_type_acceptable_list is None:
-        index_type_acceptable_list = ["basic", "faiss", "chroma"]
+        index_type_acceptable_list = ["basic","basic_svm", "faiss", "chroma"]
 
     if not isinstance(index_type, str):
         raise Exception("Index Type must be a string")
