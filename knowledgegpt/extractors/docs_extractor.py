@@ -13,9 +13,9 @@ class DocsExtractor(BaseExtractor):
     """
 
     def __init__(self, file_path: str, embedding_extractor: str = "hf", model_lang: str = "en", is_turbo: bool = False,
-                 verbose: bool = False, index_path: str = None, index_type: str = "basic"):
+                 verbose: bool = False, index_path: str = None, index_type: str = "basic",  strict_context: bool = False, is_gpt4: bool = False, prompt_template: str = None):
         super().__init__(embedding_extractor=embedding_extractor, model_lang=model_lang, is_turbo=is_turbo,
-                         verbose=verbose, index_path=index_path, index_type=index_type)
+                         verbose=verbose, index_path=index_path, index_type=index_type, is_gpt4=is_gpt4, prompt_template=prompt_template, strict_context=strict_context)
         self.file_path = file_path
 
 

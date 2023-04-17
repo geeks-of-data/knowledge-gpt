@@ -10,9 +10,17 @@ ENCODING = "gpt2"
 encoding = tiktoken.get_encoding(ENCODING)
 separator_len = len(encoding.encode(SEPARATOR))
 
+relevancy_template = '''
+You duty is to check if the question given and the context part given are relevant to each other. If they are relevant, please write "yes" or "y" or "1" or "true" or "t". If they are not relevant, please write "no" or "n" or "0" or "false" or "f". If you are not sure, please write "unsure" or "u" or "2" or "maybe" or "m".
+You don't have to be super strict, a basic relevancy check is enough we are trying to hunt down stuff like references to other documents, or other stuff that is not relevant to the question.
+Question: {question}
+Context: {context}
+Answer:
+'''
+
 
 def construct_prompt(question: str, context_embeddings: dict, df: pd.DataFrame, embedding_type: str = "hf",
-                     verbose=False, model_lang: str = "en", max_tokens=1000, index_type="basic", prompt_template=None) -> str:
+                     verbose=False, model_lang: str = "en", max_tokens=1000, index_type="basic", prompt_template=None, strict_context=False) -> str:
     """
     Construct the prompt to be used for completion.
     :param question: The question to answer.
@@ -37,9 +45,28 @@ def construct_prompt(question: str, context_embeddings: dict, df: pd.DataFrame, 
     chosen_sections = []
     chosen_sections_len = 0
     chosen_sections_indexes = []
-
+    if strict_context:
+        print("STRICT MODE IS ON, THIS IS GOING TO TAKE A WHILE AND IS AN EXPERIMENTAL FEATURE")
     for _, section_index in most_relevant_document_sections:
         document_section = df.loc[section_index]
+        
+        if strict_context:
+            if len(document_section.content) < 10:
+                continue
+            
+            import openai
+            from knowledgegpt.utils.utils_completion import model_types
+            
+            prompt = relevancy_template.format(question=question, context=document_section.content)
+            
+            response = openai.Completion.create(
+                prompt = prompt,
+                ** model_types["davinci"]
+            )
+            
+            if response["choices"][0]["text"].strip(" \n").lower() in ["no", "n", "0", "false", "f"]:
+                continue
+        
         document_tokens = len(encoding.encode(document_section.content))
         chosen_sections_len += document_tokens + separator_len
         if chosen_sections_len > MAX_SECTION_LEN:

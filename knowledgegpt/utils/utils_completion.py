@@ -38,7 +38,8 @@ def answer_query_with_context(
         index_type: str = "basic",
         max_tokens=1000,
         prompt_template=None,
-        context_restarter: bool = False
+        context_restarter: bool = False,
+        strict_context: bool = False,
 ) -> str:
     """
     Answer a query using the provided context.
@@ -66,7 +67,8 @@ def answer_query_with_context(
             model_lang=model_lang,
             max_tokens=max_tokens,
             index_type=index_type,
-            prompt_template=prompt_template
+            prompt_template=prompt_template,
+            strict_context=strict_context,
         )
         if is_turbo:
             messages.append({"role": "user", "content": prompt})

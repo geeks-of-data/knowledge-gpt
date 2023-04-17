@@ -8,13 +8,13 @@ from io import BytesIO
 
 class HybridFileExtractpr(BaseExtractor):
     def __init__(self, directory_path: str, extraction_type: str = "page", embedding_extractor: str = "hf",
-                 model_lang: str = "en", is_turbo: bool = False, verbose: bool = False, index_path: str = None, index_type: str = "basic"):
+                 model_lang: str = "en", is_turbo: bool = False, verbose: bool = False, index_path: str = None, index_type: str = "basic", strict_context: bool = False, is_gpt4: bool = False, prompt_template: str = None):
         """
         Extracts paragraphs from a PDF file and computes embeddings for each paragraph,
         then answers a query using the embeddings.
         """
         super().__init__(embedding_extractor=embedding_extractor, model_lang=model_lang, is_turbo=is_turbo,
-                         verbose=verbose, index_path=index_path, index_type=index_type)
+                         verbose=verbose, index_path=index_path, index_type=index_type, is_gpt4=is_gpt4, prompt_template=prompt_template, strict_context=strict_context)
 
         self.directory_path = directory_path
         self.extraction_type = extraction_type

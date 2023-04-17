@@ -9,10 +9,10 @@ class BaseAgent(BaseExtractor):
     """
     
     def __init__(self, dataframe=None, embedding_extractor="hf", model_lang="en", is_turbo=False, index_type="basic",
-                 verbose=False, index_path=None, is_gpt4=False, prompt_template=None, task_type="image_generation", hf_token=None):
+                 verbose=False, index_path=None, is_gpt4=False, prompt_template=None, task_type="image_generation", hf_token=None,  strict_context: bool = False):
         super().__init__(dataframe=dataframe, embedding_extractor=embedding_extractor, model_lang=model_lang,
                          is_turbo=is_turbo, index_type=index_type, verbose=verbose, index_path=index_path, is_gpt4=is_gpt4,
-                         prompt_template=prompt_template)
+                         prompt_template=prompt_template, strict_context=strict_context)
         
         self.hf_token = hf_token
         self.task_type = task_type

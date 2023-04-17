@@ -5,7 +5,7 @@ from knowledgegpt.utils.utils_completion import answer_query_with_context
 
 class BaseExtractor:
     def __init__(self, dataframe=None, embedding_extractor="hf", model_lang="en", is_turbo=False, index_type="basic",
-                 verbose=False, index_path=None, is_gpt4=False, prompt_template=None):
+                 verbose=False, index_path=None, is_gpt4=False, prompt_template=None, strict_context=False):
 
         """
         :param dataframe: if you have own df use it else choose correct extractor
@@ -32,7 +32,7 @@ class BaseExtractor:
         self.is_gpt4 = is_gpt4
         self.prompt_template = prompt_template
         self.messages = []
-
+        self.strict_context = strict_context
         self.embeddings = None
         self.answer = ""
         self.prompt = ""
@@ -86,7 +86,8 @@ class BaseExtractor:
             max_tokens=max_tokens,
             index_type=self.index_type,
             prompt_template=self.prompt_template,
-            context_restarter=context_restarter
+            context_restarter=context_restarter,
+            strict_context=self.strict_context
         )
         if not self.verbose:
             print("all_done!")
