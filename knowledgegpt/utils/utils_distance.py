@@ -42,6 +42,29 @@ def order_document_sections_by_query_similarity(query: str, contexts: dict[(str,
             (vector_similarity(query_embedding, doc_embedding), doc_index) for doc_index, doc_embedding in
             contexts.items()
         ], reverse=True)
+        
+    elif index_type == "basic_svm":
+        # pass
+        from sklearn import svm
+        import numpy as np
+
+        x = np.concatenate([query_embedding[None,...], np.array(list(contexts.values()))], axis=0)
+        y= np.zeros(len(x))
+        y[0]=1
+        
+        clf = svm.LinearSVC(class_weight='balanced', verbose=False, max_iter=10000, tol=1e-6, C=1.0)
+        clf.fit(x, y) # train
+        
+        similarities = clf.decision_function(x)
+        sorted_ix = np.argsort(-similarities)
+        
+        n_neighbors = len(contexts)//4
+        
+        document_similarities = [(similarities[i], list(contexts.keys())[i]) for i in sorted_ix[:min(n_neighbors, len(sorted_ix))]]
+
+        
+        return document_similarities
+        
     elif index_type == "faiss":
         import faiss
 
