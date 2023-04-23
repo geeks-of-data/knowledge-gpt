@@ -68,11 +68,3 @@ def compute_doc_embeddings(df: pd.DataFrame) -> dict[tuple[str, str], list[float
     :return: The embeddings for the document sections.
     """
     return {idx: get_embedding(r.content) for idx, r in df.iterrows()}
-
-
-def get_dimensions(lang: str) -> int:
-    """
-    Returns the dimensionality of the embeddings for the specified language.
-    :param lang: The language of the embeddings.
-    :return: The dimensionality of the embeddings.
-    """
