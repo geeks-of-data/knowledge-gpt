@@ -9,11 +9,14 @@ EMBEDDING_MODEL = "text-embedding-ada-002"
 
 model_language_map = {
     "en": "sentence-transformers/all-MiniLM-L6-v2",
-    "tr": "emrecan/bert-base-turkish-cased-mean-nli-stsb-tr"
+    "tr": "emrecan/bert-base-turkish-cased-mean-nli-stsb-tr",
+    "it": "efederici/sentence-it5-base",
 }
 
+lang_embedding_dim_map = {"en": 384, "tr": 768, "it": 512}
 
-def get_hf_embeddings(text: str, model_lang='en') -> np.ndarray:
+
+def get_hf_embeddings(text: str, model_lang="en") -> np.ndarray:
     """
     Returns the embeddings for the supplied text using the specified model. Uses the Hugging Face library.
     :param text: The text to embed.
@@ -31,7 +34,9 @@ def get_hf_embeddings(text: str, model_lang='en') -> np.ndarray:
     return sentence_embeddings[0]
 
 
-def compute_doc_embeddings_hf(df: pd.DataFrame, model_lang='en') -> dict[tuple[str, str], np.ndarray]:
+def compute_doc_embeddings_hf(
+    df: pd.DataFrame, model_lang="en"
+) -> dict[tuple[str, str], np.ndarray]:
     """
     Computes the embeddings for the document sections.
     :param df: The dataframe containing the document sections.
@@ -40,9 +45,7 @@ def compute_doc_embeddings_hf(df: pd.DataFrame, model_lang='en') -> dict[tuple[s
 
     """
 
-    return {
-        idx: get_hf_embeddings(r.content, model_lang) for idx, r in df.iterrows()
-    }
+    return {idx: get_hf_embeddings(r.content, model_lang) for idx, r in df.iterrows()}
 
 
 # below sourced from here https://github.com/openai/openai-cookbook/blob/main/examples/Question_answering_using_embeddings.ipynb
@@ -53,10 +56,7 @@ def get_embedding(text: str, model: str = EMBEDDING_MODEL) -> list[float]:
     :param model: The model to use.
     :return: The embeddings for the text.
     """
-    result = openai.Embedding.create(
-        model=model,
-        input=text
-    )
+    result = openai.Embedding.create(model=model, input=text)
     time.sleep(5)
     return result["data"][0]["embedding"]
 
@@ -67,6 +67,12 @@ def compute_doc_embeddings(df: pd.DataFrame) -> dict[tuple[str, str], list[float
     :param df: The dataframe containing the document sections.
     :return: The embeddings for the document sections.
     """
-    return {
-        idx: get_embedding(r.content) for idx, r in df.iterrows()
-    }
+    return {idx: get_embedding(r.content) for idx, r in df.iterrows()}
+
+
+def get_dimensions(lang: str) -> int:
+    """
+    Returns the dimensionality of the embeddings for the specified language.
+    :param lang: The language of the embeddings.
+    :return: The dimensionality of the embeddings.
+    """

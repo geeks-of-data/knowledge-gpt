@@ -27,3 +27,4 @@ static_files/*_test.*
 examples/example_config.py
 output_images/
 .chroma
+settings.json
